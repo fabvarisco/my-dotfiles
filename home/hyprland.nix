@@ -40,11 +40,14 @@
     jq
   ];
 
-  # Hyprland configs — individual symlinks so ~/.config/hypr/ is a regular
-  # writable directory (tools like hyprmon can create files inside it).
-  home.file.".config/hypr/hyprland.conf".text =
-    builtins.replaceStrings [ "@USERNAME@" ] [ user.username ]
-    (builtins.readFile ../config/hyprland/hyprland.conf);
+  # Hyprland 0.55+ prefers hyprland.lua and ignores hyprland.conf when both exist.
+  # force replaces the example file Hyprland generates on first launch.
+  home.file.".config/hypr/hyprland.lua" = {
+    force = true;
+    text =
+      builtins.replaceStrings [ "@USERNAME@" ] [ user.username ]
+      (builtins.readFile ../config/hyprland/hyprland.lua);
+  };
 
   home.file.".config/hypr/hypridle.conf".source = ../config/hyprland/hypridle.conf;
   home.file.".config/hypr/hyprlock.conf".source = ../config/hyprland/hyprlock.conf;

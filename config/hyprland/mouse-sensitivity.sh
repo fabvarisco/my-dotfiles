@@ -34,8 +34,8 @@ if [ -z "$selected" ]; then
     exit 0
 fi
 
-# Apply sensitivity
-hyprctl keyword input:sensitivity "$selected"
+# Apply sensitivity. hyprctl keyword was removed in Hyprland 0.56.
+hyprctl eval "hl.config({ input = { sensitivity = ${selected} } })"
 
 # Save for persistence across reboots (using writable location)
 mkdir -p ~/.local/state/hypr

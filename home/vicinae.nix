@@ -1,8 +1,15 @@
 { inputs, pkgs, ... }:
 
 let
-  mkExt = inputs.vicinae.packages.${pkgs.stdenv.hostPlatform.system}.mkVicinaeExtension;
+  system = pkgs.stdenv.hostPlatform.system;
+  mkExt = inputs.vicinae.lib.${system}.mkVicinaeExtension;
   extsSrc = inputs.vicinae-extensions;
+  # Vicinae links with gcc15, but the Numen input is built with nixpkgs' default
+  # stdenv (GCC 16). That pulls in GLIBCXX_3.4.36, which gcc15's libstdc++ lacks.
+  numen = inputs.vicinae.inputs.numen.packages.${system}.numen.override {
+    withRepl = false;
+    stdenv = pkgs.gcc15Stdenv;
+  };
   ext = name: mkExt {
     pname = name;
     version = "0-unstable-${extsSrc.shortRev or "unknown"}";
@@ -19,6 +26,9 @@ in
 
   services.vicinae = {
     enable = true;
+    package = inputs.vicinae.packages.${system}.default.override {
+      inherit numen;
+    };
     systemd = {
       enable = true;
       autoStart = true;
@@ -43,19 +53,6 @@ in
       ];
     };
     extensions = [
-      # (ext "hypr")
-      # (ext "hypr-keybinds")
-      # (ext "hyprland-monitors")
-      # (ext "wifi-commander")
-      # (ext "vscode-recents")
-      # (ext "github")
-      (ext "agenda")
-      (ext "html-symbol-finder")
-      #(ext "mise")
-      (ext "iconify")
-      #(ext "npm")
-      (ext "nix")
-      (ext "process-manager")
       (localExt "noctalia-settings")
     ];
   };
