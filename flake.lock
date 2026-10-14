@@ -57,14 +57,18 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1791907254,
-        "narHash": "sha256-SanKDq/8nGyTJaFy2ujNdPJ0+gQFXwpFIvXgAKoIxew=",
-        "type": "tarball",
-        "url": "https://github.com/ogulcancelik/herdr/archive/master.tar.gz"
+        "lastModified": 1791919474,
+        "narHash": "sha256-zTn+nM2JTXwlqZ4TxwYnkuvRAAbUpPYu7dSP+WzSRbg=",
+        "ref": "refs/heads/master",
+        "rev": "87e5c13c6028df72405f63388dde585212ad3019",
+        "revCount": 1849,
+        "type": "git",
+        "url": "https://github.com/ogulcancelik/herdr"
       },
       "original": {
-        "type": "tarball",
-        "url": "https://github.com/ogulcancelik/herdr/archive/master.tar.gz"
+        "rev": "87e5c13c6028df72405f63388dde585212ad3019",
+        "type": "git",
+        "url": "https://github.com/ogulcancelik/herdr"
       }
     },
     "home-manager": {

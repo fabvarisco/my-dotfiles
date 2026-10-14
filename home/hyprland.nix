@@ -56,6 +56,10 @@
     source = ../config/hyprland/battery-manager.sh;
     executable = true;
   };
+  home.file.".config/hypr/gpu-screen.sh" = {
+    source = ../config/hyprland/gpu-screen.sh;
+    executable = true;
+  };
   home.file.".config/hypr/mouse-sensitivity.sh" = {
     source = ../config/hyprland/mouse-sensitivity.sh;
     executable = true;

@@ -99,7 +99,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("sleep 1 && gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' && gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'")
     hl.exec_cmd("cp -n ~/.config/kde/kdeglobals ~/.config/kdeglobals 2>/dev/null || true")
     hl.exec_cmd('hyprctl setcursor "AOSP Cursors" 24')
-    hl.exec_cmd("vicinae server")
+    -- vicinae is started by the systemd user service. A second
+    -- `vicinae server` here registers another tray icon.
 end)
 
 -------------------------------
@@ -166,6 +167,9 @@ hl.config({
 
     dwindle = {
         preserve_split = true,
+        -- Default 1.0 keeps splitting an ultrawide into columns (1x1x1).
+        -- 1.5 stacks the third window (1 | 2) on the Dell and the ThinkPad.
+        split_width_multiplier = 1.5,
     },
 
     master = {
@@ -286,9 +290,9 @@ hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd([[grim ~/Pictures/screenshot_$(da
 hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd([[grim -g "$(slurp)" - | swappy -f -]]))
 hl.bind(mainMod .. " + SHIFT + Print", hl.dsp.exec_cmd([[grim -g "$(slurp)" - | wl-copy && notify-send "Screenshot" "Region copied to clipboard"]]))
 
-hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd([[pgrep -x gpu-screen-rec && (pkill -SIGINT gpu-screen-rec && notify-send "Recording" "Stopped") || (gpu-screen-recorder -w DP-2 -f 60 -a default_output -o ~/Videos/recording_$(date +%Y%m%d_%H%M%S).mp4 & notify-send "Recording" "Started")]]))
-hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd([[pgrep -x gpu-screen-rec && (pkill -SIGINT gpu-screen-rec && notify-send "Replay Buffer" "Stopped") || (gpu-screen-recorder -w DP-2 -f 60 -a default_output -r 60 -o ~/Videos & notify-send "Replay Buffer" "Started (60s)")]]))
-hl.bind(mainMod .. " + SHIFT + G", hl.dsp.exec_cmd([[pkill -SIGUSR1 gpu-screen-rec && notify-send "Replay" "Clip saved!" || notify-send "Replay" "No replay buffer running"]]))
+hl.bind(mainMod .. " + SHIFT + R", hl.dsp.exec_cmd("~/.config/hypr/gpu-screen.sh record-toggle"))
+hl.bind(mainMod .. " + SHIFT + B", hl.dsp.exec_cmd("~/.config/hypr/gpu-screen.sh replay-toggle"))
+hl.bind(mainMod .. " + SHIFT + G", hl.dsp.exec_cmd("~/.config/hypr/gpu-screen.sh replay-save"))
 
 --------------------------------
 ---- WINDOWS AND WORKSPACES ----

@@ -52,7 +52,7 @@
     };
 
     herdr = {
-      url = "https://github.com/ogulcancelik/herdr/archive/master.tar.gz";
+      url = "git+https://github.com/ogulcancelik/herdr?rev=87e5c13c6028df72405f63388dde585212ad3019";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
