@@ -237,7 +237,7 @@ hl.bind(mainMod .. " + M", hl.dsp.exec_cmd(
 ))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind("ALT + SPACE", hl.dsp.exec_cmd(menu))
-hl.bind(mainMod .. " + V", hl.dsp.exec_cmd('vicinae deeplink "vicinae://extensions/vicinae/clipboard/history"'))
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd([[vicinae 'vicinae://launch/clipboard/history?toggle=true']]))
 hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd("~/.config/hypr/wallpaper-vicinae.sh"))
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("kitty --class hyprmon -e hyprmon"))
 hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("kitty --class battery-mgr -e ~/.config/hypr/battery-manager.sh"))
