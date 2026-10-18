@@ -15,5 +15,8 @@
     cmatrix
     tenki
     krabby
+    teamspeak6-client
+    protonvpn-gui
+    wireguard-tools
   ];
 }
