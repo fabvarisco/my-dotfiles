@@ -47,7 +47,7 @@ in
       launcher_window.opacity = 1.0;
       # logind TerminateSession kills sddm-helper with Hyprland and leaves a
       # black VT. Exit the compositor so SilentSDDM can show the greeter.
-      providers.power.entrypoints.logout.preferences.customProgram = "hyprctl dispatch exit";
+      providers.power.entrypoints.logout.preferences.customProgram = "hyprctl dispatch 'hl.dsp.exit()'";
       favorites = [
         "applications:cursor"
         "applications:zen-beta"

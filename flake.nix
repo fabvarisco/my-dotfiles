@@ -39,6 +39,10 @@
     noctalia = {
       url = "github:noctalia-dev/noctalia/legacy-v4";
       inputs.nixpkgs.follows = "nixpkgs";
+      # Upstream noctalia-qs does not build against Qt 6.12. This fork
+      # keeps the v4 shell and completes the PipeWire meta types moc needs.
+      inputs.noctalia-qs.url = "github:DBeidachazi/noctalia-qs/v0.0.13";
+      inputs.noctalia-qs.inputs.nixpkgs.follows = "nixpkgs";
     };
 
     silentSDDM = {
