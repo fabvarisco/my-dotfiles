@@ -1,5 +1,6 @@
 format = """
-[ \uf120 ](bg:#3e3e42 fg:#1e1e1e)\
+[\ue0b6](fg:#3e3e42)\
+[\uf120 ](bg:#3e3e42 fg:#1e1e1e)\
 [](bg:#007acc fg:#3e3e42)\
 $directory\
 [](fg:#007acc bg:#2d2d30)\
@@ -36,6 +37,11 @@ format = '[[ $symbol $branch ](fg:#b5cea8 bg:#2d2d30)]($style)'
 style = "bg:#2d2d30"
 format = '[[($all_status$ahead_behind )](fg:#b5cea8 bg:#2d2d30)]($style)'
 
+[hg_branch]
+format = 'on [🌱 $branch](bold purple)'
+truncation_length = 4
+truncation_symbol = ''
+
 [nodejs]
 symbol = ""
 style = "bg:#252526"
@@ -55,6 +61,16 @@ format = '[[ $symbol ($version) ](fg:#4ec9b0 bg:#252526)]($style)'
 symbol = ""
 style = "bg:#252526"
 format = '[[ $symbol ($version) ](fg:#ce9178 bg:#252526)]($style)'
+
+[os]
+format = "on [($name )]($style)"
+style = "bold blue"
+disabled = false
+
+[os.symbols]
+Windows = " "
+Arch = "Arch is the best! "
+
 
 [time]
 disabled = false
