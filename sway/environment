@@ -1,0 +1,13 @@
+# Sourced by start-sway with allexport enabled.
+# Canoas, RS. The system timezone stays America/New_York until it is
+# changed with timedatectl; this makes the Sway session use Brasília time.
+TZ=America/Sao_Paulo
+PATH="$HOME/.nix-profile/bin:$PATH"
+# Nix icon themes live in the profile. GTK looks here before /usr/share.
+XDG_DATA_DIRS="$HOME/.nix-profile/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+_JAVA_AWT_WM_NONREPARENTING=1
+
+# SwayFX's Nix build looks for EGL and GBM under /run/opengl-driver.
+__EGL_VENDOR_LIBRARY_FILENAMES="$HOME/.nix-profile/share/glvnd/egl_vendor.d/50_mesa.json"
+LIBGL_DRIVERS_PATH="$HOME/.nix-profile/lib/dri"
+GBM_BACKENDS_PATH="$HOME/.nix-profile/lib/gbm"

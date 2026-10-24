@@ -1,0 +1,91 @@
+[shell]
+font_family = "JetBrainsMono Nerd Font"
+setup_wizard_enabled = false
+settings_show_advanced = true
+corner_radius_scale = 1.15
+time_format = "{:%H:%M}"
+date_format = "%A, %d/%m/%Y"
+
+[shell.panel]
+transparency_mode = "glass"
+
+[shell.screenshot]
+annotate = true
+freeze_screen = true
+copy_to_clipboard = true
+save_to_file = true
+close_on_copy = true
+close_on_save = true
+
+[shell.screen_corners]
+enabled = true
+size = 12
+
+[theme]
+mode = "dark"
+source = "custom"
+custom_palette = "mono"
+
+[bar.default]
+margin_ends = 0
+margin_edge = 0
+radius = 0
+radius_bottom_left = 0
+radius_bottom_right = 0
+radius_top_left = 0
+radius_top_right = 0
+concave_edge_corners = false
+shadow = false
+thickness = 32
+background_opacity = 1.0
+compositor_blur = false
+capsule = false
+border_width = 0
+start = [ "launcher", "workspaces" ]
+center = [ "clock" ]
+end = [ "tray", "network", "volume", "battery", "control-center" ]
+
+[widget.workspaces]
+font_family = "sans-serif"
+style = "regular"
+show_labels = false
+pill_scale = 1.0
+active_pill_size = 1.0
+inactive_pill_size = 1.0
+focused_color = "#C8C8C8"
+occupied_color = "#707070"
+empty_color = "#707070"
+
+[dock]
+enabled = true
+auto_hide = true
+position = "bottom"
+margin_edge = 8
+reserve_space = false
+background_opacity = 0.55
+radius = 22
+radius_bottom_left = 22
+radius_bottom_right = 22
+radius_top_left = 22
+radius_top_right = 22
+shadow = true
+show_dots = true
+magnification = true
+magnification_scale = 1.35
+icon_size = 44
+inactive_scale = 0.92
+concave_edge_corners = false
+
+[location]
+auto_locate = false
+address = "Canoas, RS, Brazil"
+latitude = -29.9178
+longitude = -51.1836
+
+[widget.clock]
+format = "{:%H:%M}"
+
+[wallpaper]
+enabled = true
+directory = "/home/fabvarisco/Pictures/Wallpapers"
+fill_mode = "crop"

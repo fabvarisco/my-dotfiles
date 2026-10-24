@@ -1,0 +1,97 @@
+format = """
+$username\
+$directory\
+$git_branch\
+$nodejs\
+$rust\
+$golang\
+$php\
+$python\
+$time\
+\n$character"""
+
+palette = "lock_dusk"
+
+[palettes.tokyo_night]
+foreground = "#c0caf5"
+cyan = "#7dcfff"
+blue = "#7aa2f7"
+purple = "#bb9af7"
+green = "#9ece6a"
+yellow = "#e0af68"
+red = "#f7768e"
+orange = "#ff9e64"
+comment = "#565f89"
+
+[palettes.lock_dusk]
+foreground = "#c4ccd8"
+cyan = "#8fa4b8"
+blue = "#6a7a9d"
+purple = "#8878a8"
+green = "#7cb87c"
+yellow = "#d8c898"
+red = "#c87878"
+orange = "#d8a878"
+comment = "#5a5a7a"
+
+[character]
+success_symbol = "[❯](fg:green)"
+error_symbol = "[❯](fg:red)"
+
+[username]
+show_always = true
+style_user = "fg:purple bold"
+style_root = "fg:red bold"
+format = '[\[$user@fedora\]]($style_user) '
+
+[directory]
+style = "fg:cyan"
+format = '[\[$path\]]($style) '
+truncation_length = 3
+truncation_symbol = "…/"
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+
+[git_branch]
+symbol = ""
+style = "fg:purple"
+format = '[\[$branch\]]($style) '
+
+[git_status]
+style = "fg:comment"
+format = '([\[$all_status$ahead_behind\]]($style) )'
+
+[nodejs]
+symbol = ""
+style = "fg:green"
+format = '[\[$version\]]($style) '
+
+[rust]
+symbol = ""
+style = "fg:orange"
+format = '[\[$version\]]($style) '
+
+[golang]
+symbol = ""
+style = "fg:cyan"
+format = '[\[$version\]]($style) '
+
+[php]
+symbol = ""
+style = "fg:purple"
+format = '[\[$version\]]($style) '
+
+[python]
+symbol = ""
+style = "fg:yellow"
+format = '[\[$version\]]($style) '
+
+[time]
+disabled = false
+time_format = "%R"
+style = "fg:foreground"
+format = '[\[$time\]]($style)'
