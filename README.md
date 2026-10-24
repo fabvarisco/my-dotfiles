@@ -2,7 +2,7 @@
 
 Dotfiles for a tiling desktop on Windows 11: GlazeWM, YASB, Starship, and Fastfetch. Window borders from GlazeWM need Windows 11.
 
-Two files still point at `C:\Users\fabri`: `profile powershell` and `.config/fastfetch/config.jsonc`. After copying, change that path to your own user folder.
+`.config/fastfetch/config.jsonc` still sets `logo.source` to `C:\Users\fabri\.config\fastfetch\ascii.txt`. The PowerShell profile ignores that and picks a random file from `ascii-arts`. Change `logo.source` if you run Fastfetch without the profile.
 
 ## Install the programs
 
@@ -14,7 +14,7 @@ winget install --id fastfetch-cli.Fastfetch -e
 winget install --id Microsoft.PowerShell -e
 ```
 
-The bar and the prompt use JetBrainsMono Nerd Font (`JetBrainsMono NFP`). Install that font and restart the terminal. YASB icons also use Segoe Fluent Icons, which ships with Windows 11.
+The bar and the prompt use JetBrainsMono Nerd Font (`JetBrainsMono NFP`). Install that font and restart the terminal. YASB icons also use Segoe MDL2 Assets, which ships with Windows.
 
 ## Install the config
 
@@ -29,19 +29,12 @@ New-Item -ItemType SymbolicLink -Force -Path "$env:USERPROFILE\.config\starship.
 New-Item -ItemType SymbolicLink -Force -Path "$env:USERPROFILE\.glzr" -Target "$PWD\.glzr"
 
 New-Item -ItemType Directory -Force -Path (Split-Path $PROFILE) | Out-Null
-New-Item -ItemType SymbolicLink -Force -Path $PROFILE -Target "$PWD\profile powershell"
+New-Item -ItemType SymbolicLink -Force -Path $PROFILE -Target "$PWD\.config\powerShellProfile.ps1"
 ```
 
 Creating those links needs a terminal allowed to make symlinks (Developer Mode, or an elevated PowerShell).
 
-Starship reads `.config/starship.toml`. `.config/starship-config.toml` is a second copy and is not loaded.
-
-Then edit the two hardcoded paths:
-
-- `profile powershell`: both `C:/Users/fabri/.config/fastfetch/...` lines
-- `.config/fastfetch/config.jsonc`: `logo.source`
-
-Point them at `$env:USERPROFILE\.config\fastfetch`.
+Starship reads `.config/starship.toml`. The PowerShell profile loads Starship and Fastfetch from `$HOME\.config`.
 
 Start YASB from the Start menu. Its config starts GlazeWM. To launch them at login, put a shortcut to `yasb.exe` in `shell:startup`.
 
