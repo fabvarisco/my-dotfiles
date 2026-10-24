@@ -68,24 +68,9 @@ local function load_monitors(path)
 end
 
 if not load_monitors(home .. "/.config/hypr/monitors.conf") then
-    hl.monitor({ output = "eDP-1", mode = "1920x1200@60", position = "auto", scale = 1 })
     hl.monitor({ output = "desc:Dell Inc. DELL P3425WE", mode = "3440x1440@100", position = "0x0", scale = 1 })
     hl.monitor({ output = "", mode = "preferred", position = "auto", scale = 1 })
 end
-
--- Disable the laptop panel while the lid is closed.
-hl.bind("switch:on:Lid Switch", function()
-    hl.monitor({ output = "eDP-1", disabled = true })
-end, { locked = true })
-
-hl.bind("switch:off:Lid Switch", function()
-    hl.monitor({
-        output = "eDP-1",
-        mode = "1920x1200@60",
-        position = "0x0",
-        scale = 1,
-    })
-end, { locked = true })
 
 -------------------
 ---- AUTOSTART ----
@@ -168,7 +153,7 @@ hl.config({
     dwindle = {
         preserve_split = true,
         -- Default 1.0 keeps splitting an ultrawide into columns (1x1x1).
-        -- 1.5 stacks the third window (1 | 2) on the Dell and the ThinkPad.
+        -- 1.5 stacks the third window (1 | 2) on the Dell.
         split_width_multiplier = 1.5,
     },
 
@@ -240,7 +225,6 @@ hl.bind("ALT + SPACE", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd([[vicinae 'vicinae://launch/clipboard/history?toggle=true']]))
 hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd("~/.config/hypr/wallpaper-vicinae.sh"))
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("kitty --class hyprmon -e hyprmon"))
-hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("kitty --class battery-mgr -e ~/.config/hypr/battery-manager.sh"))
 hl.bind(mainMod .. " + SHIFT + M", hl.dsp.exec_cmd("kitty --class mouse-sens -e ~/.config/hypr/mouse-sensitivity.sh"))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("kitty --class cava -e cava"))
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
@@ -320,7 +304,6 @@ end
 
 floating_dialog("floating", "floating")
 floating_dialog("mouse-sens", "mouse-sens")
-floating_dialog("battery-mgr", "battery-mgr")
 floating_dialog("hyprmon", "hyprmon")
 
 hl.window_rule({

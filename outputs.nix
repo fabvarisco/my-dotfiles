@@ -38,10 +38,6 @@ let
     };
 in {
   nixosConfigurations = {
-    thinkpad-hypr = mkHost {
-      hostname = "thinkpad";
-      desktop = "hyprland";
-    };
     beelink-hypr = mkHost {
       hostname = "beelink";
       desktop = "hyprland";

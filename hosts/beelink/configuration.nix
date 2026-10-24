@@ -41,7 +41,6 @@
 
   environment.systemPackages = with pkgs; [
     inkscape
-    davinci-resolve
   ];
 
   system.stateVersion = "25.05";

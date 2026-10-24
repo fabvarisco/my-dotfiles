@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ pkgs, ... }:
 
 {
 
@@ -18,6 +18,5 @@
     godot_4-mono
     code-cursor
     f3d
-    inputs.herdr.packages.${pkgs.system}.default
   ];
 }

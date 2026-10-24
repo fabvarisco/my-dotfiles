@@ -54,11 +54,6 @@
       url = "https://github.com/0xc000022070/zen-browser-flake/archive/main.tar.gz";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    herdr = {
-      url = "git+https://github.com/ogulcancelik/herdr?rev=87e5c13c6028df72405f63388dde585212ad3019";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs = inputs:  import ./outputs.nix inputs;

@@ -52,10 +52,6 @@
   home.file.".config/hypr/hypridle.conf".source = ../config/hyprland/hypridle.conf;
   home.file.".config/hypr/hyprlock.conf".source = ../config/hyprland/hyprlock.conf;
 
-  home.file.".config/hypr/battery-manager.sh" = {
-    source = ../config/hyprland/battery-manager.sh;
-    executable = true;
-  };
   home.file.".config/hypr/gpu-screen.sh" = {
     source = ../config/hyprland/gpu-screen.sh;
     executable = true;
@@ -75,9 +71,6 @@
     mkdir -p "$HOME/.config/hypr"
     if [ ! -f "$HOME/.config/hypr/monitors.conf" ]; then
       cat > "$HOME/.config/hypr/monitors.conf" << 'MONITORSEOF'
-# Laptop display (ThinkPad eDP-1)
-monitor = eDP-1, 1920x1200@60, auto, 1.0
-
 # Dell P3425WE ultrawide
 monitor = desc:Dell Inc. DELL P3425WE, 3440x1440@100, 0x0, 1.0
 
