@@ -1,151 +1,71 @@
-# Branch: windows/glazewm-yasb
+# Windows GlazeWM + YASB
 
-This branch contains custom configurations for Windows, focusing on a window management environment and interface customization.
+Dotfiles for a tiling desktop on Windows 11: GlazeWM, YASB, Starship, and Fastfetch. Window borders from GlazeWM need Windows 11.
 
-### What's Included
+Two files still point at `C:\Users\fabri`: `profile powershell` and `.config/fastfetch/config.jsonc`. After copying, change that path to your own user folder.
 
-This repository contains configurations for:
-
-#### 🪟 **GlazeWM** - Tiling Window Manager
-- Tiling window manager for Windows
-- Configuration located at `.glzr/glazewm/config.yaml`
-- Provides an i3/bspwm-like experience on Windows
-
-#### 📊 **YASB** (Yet Another Status Bar)
-- Customizable status bar for Windows
-- Configuration files in `.config/yasb/`:
-  - `config.yaml` - Main bar configuration
-  - `styles.css` - Custom visual styles
-
-#### ⚡ **PowerShell**
-- Custom PowerShell profile
-- File: `profile powershell`
-- Features:
-  - UTF-8 configuration
-  - Starship prompt integration
-  - Fastfetch with random ASCII arts on startup
-
-#### 🚀 **Starship**
-- Minimal and fast cross-shell prompt
-- Configurations in `.config/`:
-  - `starship.toml`
-  - `starship-config.toml`
-
-#### 🎨 **Fastfetch**
-- System information tool (neofetch alternative)
-- Configuration in `.config/fastfetch/`:
-  - `config.jsonc` - Main configuration
-  - `ascii-arts/` - Collection of custom ASCII arts (ascii1.txt - ascii4.txt)
-
-### 📋 Complete Dotfiles List
-
-```
-.
-├── .config/
-│   ├── fastfetch/
-│   │   ├── ascii-arts/
-│   │   │   ├── ascii1.txt
-│   │   │   ├── ascii2.txt
-│   │   │   ├── ascii3.txt
-│   │   │   └── ascii4.txt
-│   │   └── config.jsonc
-│   ├── yasb/
-│   │   ├── config.yaml
-│   │   └── styles.css
-│   ├── starship.toml
-│   └── starship-config.toml
-├── .glzr/
-│   └── glazewm/
-│       └── config.yaml
-├── profile powershell
-└── README.md
-```
-
-## 🔧 How to Install
-
-### Prerequisites
-
-Before installing the dotfiles, you need to have the following programs installed:
-
-1. **GlazeWM** - [Installation](https://github.com/glzr-io/glazewm)
-2. **YASB** - [Installation](https://github.com/amnweb/yasb)
-3. **Starship** - [Installation](https://starship.rs/guide/#🚀-installation)
-4. **Fastfetch** - [Installation](https://github.com/fastfetch-cli/fastfetch)
-5. **PowerShell 7+** (recommended)
-
-### Installing the Dotfiles
-
-#### Method 1: Clone and Copy Manually
+## Install the programs
 
 ```powershell
-# Clone the repository
-git clone -b windows/glazewm-yasb https://github.com/fabvarisco/my-dotfiles.git
-cd my-dotfiles
-
-# Copy files to appropriate locations
-
-# PowerShell Profile
-# Find your profile path
-echo $PROFILE
-# Copy the content of 'profile powershell' to the indicated file
-
-# Fastfetch
-Copy-Item -Recurse .config/fastfetch/* $env:USERPROFILE/.config/fastfetch/
-
-# Starship
-Copy-Item .config/starship*.toml $env:USERPROFILE/.config/
-
-# GlazeWM
-Copy-Item -Recurse .glzr/* $env:USERPROFILE/.glzr/
-
-# YASB
-Copy-Item -Recurse .config/yasb/* $env:USERPROFILE/.config/yasb/
+winget install --id glzr-io.GlazeWM -e
+winget install --id amnweb.YASB -e
+winget install --id Starship.Starship -e
+winget install --id fastfetch-cli.Fastfetch -e
+winget install --id Microsoft.PowerShell -e
 ```
 
-#### Method 2: Using Symlinks (Recommended)
+The bar and the prompt use JetBrainsMono Nerd Font (`JetBrainsMono NFP`). Install that font and restart the terminal. YASB icons also use Segoe Fluent Icons, which ships with Windows 11.
+
+## Install the config
 
 ```powershell
-# Clone the repository
-git clone -b windows/glazewm-yasb https://github.com/fabvarisco/my-dotfiles.git
-cd my-dotfiles
+git clone -b windows/glazewm-yasb https://github.com/fabvarisco/my-dotfiles.git $env:USERPROFILE\Developer\my-dotfiles
+cd $env:USERPROFILE\Developer\my-dotfiles
 
-# Create symlinks (run as Administrator)
-# PowerShell Profile
-New-Item -ItemType SymbolicLink -Path $PROFILE -Target "$PWD/profile powershell" -Force
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.config" | Out-Null
+New-Item -ItemType SymbolicLink -Force -Path "$env:USERPROFILE\.config\fastfetch" -Target "$PWD\.config\fastfetch"
+New-Item -ItemType SymbolicLink -Force -Path "$env:USERPROFILE\.config\yasb" -Target "$PWD\.config\yasb"
+New-Item -ItemType SymbolicLink -Force -Path "$env:USERPROFILE\.config\starship.toml" -Target "$PWD\.config\starship.toml"
+New-Item -ItemType SymbolicLink -Force -Path "$env:USERPROFILE\.glzr" -Target "$PWD\.glzr"
 
-# Fastfetch
-New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE/.config/fastfetch" -Target "$PWD/.config/fastfetch" -Force
-
-# Starship
-New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE/.config/starship.toml" -Target "$PWD/.config/starship.toml" -Force
-
-# GlazeWM
-New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE/.glzr" -Target "$PWD/.glzr" -Force
-
-# YASB
-New-Item -ItemType SymbolicLink -Path "$env:USERPROFILE/.config/yasb" -Target "$PWD/.config/yasb" -Force
+New-Item -ItemType Directory -Force -Path (Split-Path $PROFILE) | Out-Null
+New-Item -ItemType SymbolicLink -Force -Path $PROFILE -Target "$PWD\profile powershell"
 ```
 
-### 🎯 Customization
+Creating those links needs a terminal allowed to make symlinks (Developer Mode, or an elevated PowerShell).
 
-After installation, you can customize:
+Starship reads `.config/starship.toml`. `.config/starship-config.toml` is a second copy and is not loaded.
 
-- **ASCII Arts**: Add your own `.txt` files to `.config/fastfetch/ascii-arts/`
-- **Bar Colors**: Edit `.config/yasb/styles.css`
-- **GlazeWM Keybindings**: Modify `.glzr/glazewm/config.yaml`
-- **Prompt**: Adjust `.config/starship.toml` to your preferences
+Then edit the two hardcoded paths:
 
-### 🔄 Updating
+- `profile powershell`: both `C:/Users/fabri/.config/fastfetch/...` lines
+- `.config/fastfetch/config.jsonc`: `logo.source`
 
-To update your configurations:
+Point them at `$env:USERPROFILE\.config\fastfetch`.
+
+Start YASB from the Start menu. Its config starts GlazeWM. To launch them at login, put a shortcut to `yasb.exe` in `shell:startup`.
+
+## Already installed
 
 ```powershell
-cd my-dotfiles
-git pull origin windows/glazewm-yasb
+cd $env:USERPROFILE\Developer\my-dotfiles
+git pull
 ```
 
-If you used symlinks, changes will be applied automatically. Otherwise, copy the files again.
+Symlinks pick up the pull. Reload GlazeWM with Alt+Shift+R, and restart YASB if the bar does not reload on its own.
 
----
+## Shortcuts
 
-**Note**: Adjust paths as needed for your system.
+| Shortcut | Action |
+| --- | --- |
+| Alt+Enter | Windows Terminal |
+| Alt+H/J/K/L | Focus window |
+| Alt+Shift+H/J/K/L | Move window |
+| Alt+V | Toggle tiling direction |
+| Alt+T | Tile |
+| Alt+Shift+Space | Float |
+| Alt+F | Fullscreen |
+| Alt+Shift+Q | Close window |
+| Alt+1 … | Switch workspace |
+| Alt+Shift+R | Reload GlazeWM |
+| Alt+Shift+E | Exit GlazeWM |
