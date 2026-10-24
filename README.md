@@ -1,6 +1,6 @@
 # my-dotfiles
 
-Repositório de dotfiles. Cada sistema fica em uma branch própria.
+Dotfiles repository. Each system lives on its own branch.
 
 ## Windows
 
