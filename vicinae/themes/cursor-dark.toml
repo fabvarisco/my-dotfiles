@@ -1,0 +1,81 @@
+# Cursor Dark (Anysphere), the same palette as the Cursor editor theme.
+
+[meta]
+version = 1
+name = "Cursor Dark"
+description = "Cursor Dark palette"
+variant = "dark"
+inherits = "vicinae-dark"
+
+[colors.core]
+background = "#181818"
+foreground = "#F0F0F0"
+secondary_background = "#141414"
+border = "#272727"
+accent = "#81A1C1"
+accent_foreground = "#191c22"
+
+[colors.accents]
+blue = "#81A1C1"
+green = "#3FA266"
+magenta = "#B48EAD"
+orange = "#D2943E"
+purple = "#B48EAD"
+red = "#FC6B83"
+yellow = "#F1B467"
+cyan = "#88C0D0"
+
+[colors.main_window]
+border = "colors.core.border"
+footer = { background = "colors.core.secondary_background" }
+
+[colors.settings_window]
+border = "colors.core.border"
+
+[colors.shortcut]
+border = "colors.core.border"
+
+[colors.text]
+default = "colors.core.foreground"
+muted = "#B8B8B8"
+danger = "#E34671"
+success = "#3FA266"
+placeholder = "#989898"
+selection = { background = "#404040", foreground = "#F0F0F0" }
+
+[colors.text.links]
+default = "#88C0D0"
+visited = "#B48EAD"
+
+[colors.input]
+border = "colors.core.border"
+border_focus = "colors.core.accent"
+border_error = "#E34671"
+
+[colors.button.primary]
+background = "#81A1C1"
+foreground = "#191c22"
+hover = { background = "#87A6C4" }
+focus = { outline = "#87A6C4" }
+
+[colors.list.item.hover]
+foreground = "#F0F0F0"
+secondary_foreground = "#B8B8B8"
+
+[colors.list.item.selection]
+background = "#343434"
+foreground = "#F0F0F0"
+secondary_background = "#81A1C1"
+secondary_foreground = "#191c22"
+
+[colors.grid.item]
+background = "#242424"
+hover = { outline = "#81A1C1" }
+selection = { outline = "#88C0D0" }
+
+[colors.scrollbars]
+background = "#404040"
+
+[colors.loading]
+bar = "colors.core.accent"
+spinner = "colors.core.foreground"

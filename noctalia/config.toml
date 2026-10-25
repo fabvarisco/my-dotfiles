@@ -2,7 +2,8 @@
 font_family = "JetBrainsMono Nerd Font"
 setup_wizard_enabled = false
 settings_show_advanced = true
-corner_radius_scale = 1.15
+# 0 squares popups, dialogs, panels, and other shell surfaces.
+corner_radius_scale = 0
 time_format = "{:%H:%M}"
 date_format = "%A, %d/%m/%Y"
 
@@ -40,6 +41,8 @@ thickness = 32
 background_opacity = 1.0
 compositor_blur = false
 capsule = false
+# 0 keeps workspace pills square. Blank would use a fully rounded pill.
+capsule_radius = 0
 border_width = 0
 start = [ "launcher", "workspaces" ]
 center = [ "clock" ]
@@ -49,6 +52,7 @@ end = [ "tray", "network", "volume", "battery", "control-center" ]
 font_family = "sans-serif"
 style = "regular"
 show_labels = false
+capsule_radius = 0
 pill_scale = 1.0
 active_pill_size = 1.0
 inactive_pill_size = 1.0
@@ -63,11 +67,11 @@ position = "bottom"
 margin_edge = 8
 reserve_space = false
 background_opacity = 0.55
-radius = 22
-radius_bottom_left = 22
-radius_bottom_right = 22
-radius_top_left = 22
-radius_top_right = 22
+radius = 0
+radius_bottom_left = 0
+radius_bottom_right = 0
+radius_top_left = 0
+radius_top_right = 0
 shadow = true
 show_dots = true
 magnification = true

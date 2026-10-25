@@ -82,6 +82,8 @@ in
     nodejs_22
     rustc
     cargo
+    # Godot 3.6 LTS. pkgs.godot3 is the GDScript editor.
+    godot3
 
     # Terminal tools
     fastfetch
@@ -177,7 +179,7 @@ in
       target = "sway-session.target";
     };
     settings = {
-      theme.dark.name = "vicinae-dark";
+      theme.dark.name = "cursor-dark";
       favorites = [
         "clipboard:history"
         "applications:cursor"
@@ -240,6 +242,49 @@ in
       gtk-theme-name=Adwaita
       gtk-icon-theme-name=Tela-grey-dark
     '';
+    # Adwaita bakes #303030 / #2d2d2d into its CSS. This pulls the
+    # window, the file list, and the path bar to Cursor's #181818.
+    "gtk-3.0/gtk.css".text = ''
+      .background,
+      .background:backdrop,
+      window,
+      decoration,
+      treeview.view,
+      treeview.view:backdrop,
+      iconview.view,
+      iconview.view:backdrop,
+      textview,
+      textview text,
+      textview text:backdrop,
+      .view,
+      .view:backdrop,
+      .content-view,
+      .sidebar,
+      .sidebar:backdrop,
+      scrolledwindow,
+      viewport,
+      toolbar,
+      toolbar:backdrop,
+      .inline-toolbar,
+      headerbar,
+      headerbar:backdrop,
+      .titlebar,
+      .titlebar:backdrop,
+      .location-bar,
+      .location-bar:backdrop,
+      .path-bar,
+      .path-bar:backdrop,
+      entry,
+      entry:backdrop {
+        background-color: #181818;
+        background-image: none;
+      }
+    '';
+    # `home-manager switch` looks up <home-manager/...> on NIX_PATH.
+    # Fedora's Nix only registers nixpkgs. This appends the matching source.
+    "nix/nix.conf".text = ''
+      extra-nix-path = home-manager=flake:github:nix-community/home-manager/2cd3234928f60bbff695a7ee56115ef7799c47cd
+    '';
   };
 
   # GTK looks in ~/.local/share/icons, not ~/.config. The session does not
@@ -255,6 +300,10 @@ in
     source = ./vicinae/set-mouse-sensitivity.sh;
     executable = true;
   };
+
+  # Vicinae loads themes from XDG data dirs. The file name is the theme id
+  # referenced by programs.vicinae.settings.theme.dark.name.
+  xdg.dataFile."vicinae/themes/cursor-dark.toml".source = ./vicinae/themes/cursor-dark.toml;
 
   # nwg-displays and pointer-accel write these files. They stay outside
   # the Nix store so they remain editable after a switch.
