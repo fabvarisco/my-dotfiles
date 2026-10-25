@@ -88,7 +88,9 @@ in
       };
       setCmds = lib.concatStringsSep "\n" (lib.mapAttrsToList (dir: icon: ''
         if [ -d "${dir}" ]; then
-          run ${pkgs.glib}/bin/gio set "${dir}" metadata::custom-icon-name '${icon}'
+          # gvfs metadata is not available this early in boot. A failure here
+          # aborts the rest of home-manager activation.
+          run ${pkgs.glib}/bin/gio set "${dir}" metadata::custom-icon-name '${icon}' || true
         fi
       '') folderIcons);
     in

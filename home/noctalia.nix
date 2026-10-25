@@ -1,4 +1,4 @@
-{ inputs, config, pkgs, ... }:
+{ inputs, config, lib, pkgs, ... }:
 
 {
   imports = [ inputs.noctalia.homeModules.default ];
@@ -24,12 +24,30 @@
             sed -i 's/^import QtQuick$/import QtQuick 6.11/' "$f"
           fi
         done
+
+        # Boot race: property writes while the first read is in flight start a
+        # save 500ms later. That save cancels the read, onLoaded never runs,
+        # and the bar never appears when login is busy. Ignore those writes
+        # until the file has loaded, then allow migrations to persist.
+        sed -i \
+          -e 's/onAdapterUpdated: saveTimer.start()/onAdapterUpdated: if (root.isLoaded) saveTimer.start()/' \
+          Commons/Settings.qml
+        sed -i \
+          '/Logger.i("Settings", "Settings loaded");/a\        root.isLoaded = true;' \
+          Commons/Settings.qml
+        sed -i \
+          '/\/\/ Emit the signal/{n; /root.isLoaded = true;/d;}' \
+          Commons/Settings.qml
       '';
     });
 
-  # settings.json gerenciado fora do store (gravável) -> versionado no repo.
+  # Direct symlink into the repo. mkOutOfStoreSymlink points at a symlink in
+  # the nix store, and quickshell follows only one link when saving, so the
+  # write lands on a read-only store path and fails.
   # Edita pela UI do noctalia; muda o arquivo no repo; commit + pull sincroniza.
-  home.file.".config/noctalia/settings.json".source =
-    config.lib.file.mkOutOfStoreSymlink
-      "${config.home.homeDirectory}/Developer/my-dotfiles/config/shared/noctalia/settings.json";
+  home.activation.linkNoctaliaSettings = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    mkdir -p "$HOME/.config/noctalia"
+    ln -sfn "${config.home.homeDirectory}/Developer/my-dotfiles/config/shared/noctalia/settings.json" \
+      "$HOME/.config/noctalia/settings.json"
+  '';
 }
