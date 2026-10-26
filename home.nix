@@ -180,6 +180,9 @@ in
     };
     settings = {
       theme.dark.name = "cursor-dark";
+      # 0 squares the launcher window and its popups. The default is 10.
+      launcher_window.rounding = 0;
+      launcher_window.client_side_decorations.rounding = 0;
       favorites = [
         "clipboard:history"
         "applications:cursor"
