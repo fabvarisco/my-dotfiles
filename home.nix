@@ -101,7 +101,7 @@ in
     # Arrange Sway outputs. Writes ~/.config/sway/outputs.
     nwg-displays
 
-    # Unfocused windows stay at 80% opacity. The focused window stays opaque.
+    # Unfocused windows stay at 80% opacity. The focused window stays at 90%.
     (writeShellScriptBin "inactive-opacity" ''
       exec ${python3}/bin/python3 ${./sway/inactive-opacity.py}
     '')

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Keep unfocused windows translucent. The focused window stays opaque."""
+"""Keep unfocused windows translucent and draw a gray frame on the focused one."""
 
 import json
 import os
@@ -7,7 +7,7 @@ import signal
 import subprocess
 
 INACTIVE = 0.8
-ACTIVE = 1.0
+ACTIVE = 0.9
 
 
 def discover_sway_socket():
@@ -55,8 +55,10 @@ def apply():
     views(json.loads(raw), found)
     commands = []
     for window in found:
-        opacity = ACTIVE if window.get("focused") else INACTIVE
-        commands.append(f'[con_id={window["id"]}] opacity {opacity}')
+        focused = window.get("focused")
+        opacity = ACTIVE if focused else INACTIVE
+        border = "pixel 2" if focused else "none"
+        commands.append(f'[con_id={window["id"]}] opacity {opacity}, border {border}')
     if commands:
         subprocess.run(["swaymsg", "; ".join(commands)], check=False)
 
