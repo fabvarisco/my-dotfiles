@@ -1,3 +1,52 @@
-# Same image Noctalia is using on the main monitor.
-image=/home/fabvarisco/Pictures/Wallpapers/ascii/a1-紫调少女.png
-scaling=fill
+# swaylock-effects. Fedora's swaylock has no clock and no blur.
+# Colors follow kitty/mocha.conf.
+
+# Capture the outputs, then blur. color is the fallback if a
+# screenshot is not ready yet.
+screenshots
+color=181818
+effect-blur=10x6
+effect-vignette=0.4:0.5
+fade-in=0.3
+
+clock
+timestr=%H:%M
+datestr=%A, %d %B
+font=JetBrainsMono Nerd Font
+
+indicator
+indicator-radius=140
+indicator-thickness=6
+
+# inside: kitty background, translucent so the blur stays visible
+inside-color=181818aa
+inside-clear-color=181818aa
+inside-caps-lock-color=181818aa
+inside-ver-color=181818cc
+inside-wrong-color=181818cc
+
+# ring: active border, selection gray, and the red bell color
+ring-color=888888
+ring-clear-color=d0d0d0
+ring-caps-lock-color=b0b0b0
+ring-ver-color=d0d0d0
+ring-wrong-color=cc6666
+
+line-color=00000000
+line-clear-color=00000000
+line-caps-lock-color=00000000
+line-ver-color=00000000
+line-wrong-color=00000000
+
+separator-color=00000000
+
+text-color=e0e0e0
+text-clear-color=e0e0e0
+text-caps-lock-color=e0e0e0
+text-ver-color=e0e0e0
+text-wrong-color=cc6666
+
+key-hl-color=d0d0d0
+bs-hl-color=cc6666
+caps-lock-key-hl-color=b0b0b0
+caps-lock-bs-hl-color=cc6666

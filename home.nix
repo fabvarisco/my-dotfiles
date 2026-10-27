@@ -72,6 +72,10 @@ in
     nerd-fonts.jetbrains-mono
     # SwayFX without the nixpkgs session wrapper. Fedora's start-sway already starts the session.
     (swayfx.override { withBaseWrapper = false; isNixOS = false; })
+    # Clock and blur. The binary is named swaylock and replaces Fedora's
+    # on PATH. Its pam_unix calls /run/wrappers/bin/unix_chkpwd, which
+    # system/nix-unix-chkpwd.conf links to Fedora's setuid helper.
+    swaylock-effects
     # The Nix binary looks for EGL/GBM in /run/opengl-driver. The profile provides Mesa.
     mesa
     # Editors

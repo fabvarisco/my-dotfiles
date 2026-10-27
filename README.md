@@ -22,6 +22,8 @@ sudo dnf install \
 
 Thunar is optional. `home.nix` installs the Tela grey dark icon theme for it.
 
+`swaylock` from dnf stays for `/etc/pam.d/swaylock`. The session locks with Nix's `swaylock-effects`, installed by `home.nix`. That binary is also named `swaylock`.
+
 ### 2. `sway-config-nix` session
 
 The package in `system/` installs `start-sway` and the Wayland session entry. It provides `sway-config`, replaces `sway-config-fedora`, and removes Waybar. Noctalia is the bar.
@@ -92,7 +94,7 @@ Edit these before the first switch:
 | File | What to change |
 | --- | --- |
 | `home.nix` | `home.username` and `home.homeDirectory` |
-| `swaylock/config` | wallpaper path |
+| `swaylock/config` | lock screen: blurred screenshot, clock, Kitty gray palette |
 | `noctalia/config.toml` | `wallpaper.directory`, city, and coordinates |
 | `sway/environment` | `TZ`, when it should not be `America/Sao_Paulo` |
 | `sway/config.d/30-lid.conf` | internal display name, when it is not `eDP-1` (`swaymsg -t get_outputs`) |
@@ -116,3 +118,4 @@ Leave `home.stateVersion` at `"24.11"`.
 | `Super+Print` | full-screen screenshot |
 | `Super+Shift+c` | reload the configuration |
 | `Super+q` | close the window |
+| `Super+l` | lock the screen |
