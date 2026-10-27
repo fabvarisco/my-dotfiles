@@ -79,7 +79,8 @@ end
 hl.on("hyprland.start", function()
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_RUNTIME_DIR DISPLAY")
     hl.exec_cmd("hypridle")
-    hl.exec_cmd("sleep 2 && " .. profile .. "/bin/noctalia-shell")
+    -- noctalia-shell is the systemd user service. A second process here
+    -- would be outside Restart=on-failure and the after-sleep check.
     hl.exec_cmd("sleep 3 && pw-play " .. profile .. "/share/sounds/Oxygen-Sys-Log-In.ogg")
     hl.exec_cmd("sleep 1 && gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' && gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'")
     hl.exec_cmd("cp -n ~/.config/kde/kdeglobals ~/.config/kdeglobals 2>/dev/null || true")

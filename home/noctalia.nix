@@ -50,4 +50,28 @@
     ln -sfn "${config.home.homeDirectory}/Developer/my-dotfiles/config/shared/noctalia/settings.json" \
       "$HOME/.config/noctalia/settings.json"
   '';
+
+  # hyprland.start only runs once. After resume the shell can exit when the
+  # output disappears, and nothing brings it back. The service restarts on
+  # crash; hypridle restarts it after sleep if the bar layers are gone.
+  systemd.user.services.noctalia-shell = {
+    Unit = {
+      Description = "Noctalia shell";
+      After = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
+      StartLimitIntervalSec = "30";
+      StartLimitBurst = "5";
+    };
+
+    Service = {
+      Type = "simple";
+      ExecStart = "${config.programs.noctalia-shell.package}/bin/noctalia-shell";
+      Restart = "on-failure";
+      RestartSec = "3";
+    };
+
+    Install = {
+      WantedBy = [ "graphical-session.target" ];
+    };
+  };
 }
