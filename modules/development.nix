@@ -14,9 +14,9 @@
     fastfetch
     kitty
     starship
-    godotPackages_4_5.godot
-    godot_4-mono
+    godotPackages_4_7.godot
     code-cursor
     f3d
+    (callPackage ./grok-bot.nix { })
   ];
 }

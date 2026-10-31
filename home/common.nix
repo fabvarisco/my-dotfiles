@@ -1,6 +1,7 @@
 { config, pkgs, ... }:
 
 {
+  imports = [ ./godot.nix ];
   home.packages = with pkgs; [
     # Qt/GTK theming
     kdePackages.breeze
