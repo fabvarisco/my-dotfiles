@@ -1,5 +1,5 @@
 ---
-name: crazygames-launch
+name: crazygames-html5
 description: Integrate the CrazyGames HTML5 SDK v3 into a web game and get that game through CrazyGames' submission review — ads, lifecycle signals, leaderboards, save data, plus the approval requirements and quality guidelines that actually decide acceptance. Use this whenever someone is building or shipping a JS/HTML5 game they intend to publish on CrazyGames, mentions the CrazyGames SDK, midgame or rewarded ads in a web game, is preparing a build for submission, or has had a game rejected and wants to know why. Also use it when auditing a web game for launch readiness on a game portal even if CrazyGames is not named, since the same requirements apply almost everywhere.
 ---
 

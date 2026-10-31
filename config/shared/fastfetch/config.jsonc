@@ -3,14 +3,93 @@
   "logo": {
     "padding": {
       "top": 1
+    },
+    "color": {
+      "1": "#606060",
+      "2": "#808080",
+      "3": "#a0a0a0",
+      "4": "#c0c0c0"
+    }
+  },
+  "display": {
+    "separator": "  ",
+    "color": {
+      "keys": "#a0a0a0",
+      "title": "#d0d0d0",
+      "output": "#e0e0e0",
+      "separator": "#505050"
+    },
+    "key": {
+      "type": "both-1",
+      "width": 14
+    },
+    "percent": {
+      "type": 11,
+      "green": 50,
+      "yellow": 80,
+      "color": {
+        "green": "#808080",
+        "yellow": "#a8a8a8",
+        "red": "#d0d0d0"
+      }
+    },
+    "bar": {
+      "width": 12,
+      "char": {
+        "elapsed": "█",
+        "total": "░"
+      },
+      "color": {
+        "total": "#505050",
+        "border": "#808080"
+      }
     }
   },
   "modules": [
     "title",
-    "separator",
+    "break",
+    {
+      "type": "custom",
+      "key": " ",
+      "format": "{#38;2;208;208;208}┌ Hardware{#}"
+    },
+    {
+      "type": "cpu",
+      "key": "CPU"
+    },
+    {
+      "type": "gpu",
+      "key": "GPU"
+    },
+    {
+      "type": "cpuusage",
+      "key": "Load",
+      "format": "{avg-bar} {avg}"
+    },
+    {
+      "type": "memory",
+      "key": "RAM",
+      "format": "{used} / {total} {percentage-bar} {percentage}"
+    },
+    {
+      "type": "disk",
+      "key": "Disk",
+      "folders": ["/"],
+      "format": "{size-used} / {size-total} {size-percentage-bar} {size-percentage}"
+    },
+    "break",
+    {
+      "type": "custom",
+      "key": " ",
+      "format": "{#38;2;208;208;208}┌ System{#}"
+    },
     {
       "type": "os",
       "key": "OS"
+    },
+    {
+      "type": "host",
+      "key": "Host"
     },
     {
       "type": "kernel",
@@ -25,30 +104,25 @@
       "key": "Shell"
     },
     {
-      "type": "uptime",
-      "key": "Uptime"
-    },
-    {
-      "type": "host",
-      "key": "Host"
-    },
-    {
-      "type": "cpu",
-      "key": "CPU"
-    },
-    {
-      "type": "gpu",
-      "key": "GPU"
-    },
-    {
-      "type": "memory",
-      "key": "RAM"
-    },
-    {
-      "type": "disk",
-      "key": "Disk"
+      "type": "terminal",
+      "key": "Terminal",
+      "format": "{exe-name} {version}"
     },
     "break",
-    "colors"
+    {
+      "type": "custom",
+      "key": " ",
+      "format": "{#38;2;208;208;208}┌ Uptime{#}"
+    },
+    {
+      "type": "uptime",
+      "key": "Uptime",
+      "format": "{formatted}"
+    },
+    {
+      "type": "datetime",
+      "key": "Date",
+      "format": "{day-pretty}/{month-pretty}/{year} {hour-pretty}:{minute-pretty}"
+    }
   ]
 }
