@@ -690,7 +690,7 @@
     },
     "wallpaper": {
         "automationEnabled": true,
-        "directory": "/home/fabvarisco/Pictures/Wallpapers",
+        "directory": "~/.config/walls",
         "enableMultiMonitorDirectories": false,
         "enabled": true,
         "favorites": [

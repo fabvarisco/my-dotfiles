@@ -106,7 +106,7 @@
     {
       "type": "terminal",
       "key": "Terminal",
-      "format": "{exe-name} {version}"
+      "format": "{process-name}"
     },
     "break",
     {
