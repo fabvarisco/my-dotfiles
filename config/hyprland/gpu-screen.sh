@@ -35,7 +35,7 @@ case "${1:-}" in
     if running; then
       pkill -SIGINT -x "$comm"
       notify-send "Replay Buffer" "Stopped"
-    elif start -c mp4 -f 60 -a default_output -r 60 -o "$videos"; then
+    elif start -c mp4 -f 60 -a 'default_output|default_input' -r 60 -o "$videos"; then
       notify-send "Replay Buffer" "Started (60s)"
     else
       notify-send "Replay Buffer" "Failed to start"
@@ -53,7 +53,7 @@ case "${1:-}" in
     if running; then
       pkill -SIGINT -x "$comm"
       notify-send "Recording" "Stopped"
-    elif start -c mp4 -f 60 -a default_output -o "$videos/recording_$(date +%Y%m%d_%H%M%S).mp4"; then
+    elif start -c mp4 -f 60 -a 'default_output|default_input' -o "$videos/recording_$(date +%Y%m%d_%H%M%S).mp4"; then
       notify-send "Recording" "Started"
     else
       notify-send "Recording" "Failed to start"
