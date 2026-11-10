@@ -15,6 +15,35 @@
     vesktop
   ];
 
+  # Vicinae (and other launchers) pick this over the package desktop entry.
+  # --classic forces the IDE window instead of glass / Agents Window.
+  xdg.enable = true;
+  xdg.desktopEntries.cursor = {
+    name = "Cursor";
+    genericName = "Text Editor";
+    comment = "Code Editing. Redefined.";
+    exec = "cursor --classic %F";
+    icon = "cursor";
+    categories = [ "Utility" "TextEditor" "Development" "IDE" ];
+    mimeType = [
+      "application/x-cursor-workspace"
+      "application/x-code-workspace"
+      "text/plain"
+      "inode/directory"
+    ];
+    startupNotify = true;
+    settings = {
+      StartupWMClass = "cursor";
+      Keywords = "vscode";
+      Version = "1.5";
+    };
+    actions.new-empty-window = {
+      name = "New Empty Window";
+      exec = "cursor --classic --new-window %F";
+      icon = "cursor";
+    };
+  };
+
   # Shared configs
   home.file.".config/kitty".source = ../config/shared/kitty;
   home.file.".config/btop".source = ../config/shared/btop;
