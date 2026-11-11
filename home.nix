@@ -13,6 +13,9 @@
   ...
 }:
 
+let
+  herdrPlugins = import ./herdr-plugins.nix { inherit pkgs; };
+in
 {
   home.username = user.username;
   home.homeDirectory = "/home/${user.username}";
@@ -29,7 +32,7 @@
   # --------------------------------------------------------------------------
   # Pacotes
   # --------------------------------------------------------------------------
-  home.packages = with pkgs; [
+  home.packages = (with pkgs; [
     # --- CLI do dia a dia ---
     ripgrep
     fd
@@ -74,6 +77,15 @@
 
     # fastfetch entra por programs.fastfetch (não duplicar aqui).
     # starship entra por programs.starship.
+  ]) ++ [
+    # Binários dos plugins (o herdr em si chama a cópia dentro do plugin root).
+    (pkgs.writeShellScriptBin "herdr-gitview" ''
+      export PATH="$HOME/.nix-profile/bin:$PATH"
+      exec ${herdrPlugins.herdr-gitview}/bin/herdr-gitview "$@"
+    '')
+    (pkgs.writeShellScriptBin "herdr-nvim" ''
+      exec ${herdrPlugins.herdr-nvim}/bin/herdr-nvim "$@"
+    '')
   ];
 
   home.sessionVariables = {
@@ -271,6 +283,54 @@
       echo "LazyVim instalado em $cfg. Abra o nvim e espere os plugins baixarem."
     '';
   };
+
+  # --------------------------------------------------------------------------
+  # herdr: plugins TUI (gitview + nvim). herdr-chat fica de fora (app macOS).
+  # plugins.json é o registro que o herdr 0.9.5 lê. As chaves prefix+ abaixo
+  # não batem com os defaults do herdr (prefix+e é o scrollback, prefix+o
+  # abre a notificação, prefix+v divide o pane, cmd+… não existe no WSL).
+  # ~/.config/nvim continua sem ser gerenciado.
+  # --------------------------------------------------------------------------
+  xdg.configFile."herdr/plugins.json".source = "${herdrPlugins.registry}/plugins.json";
+
+  xdg.configFile."herdr/config.toml".text = ''
+    # Atalhos dos plugins. O resto fica no default compilado do herdr.
+    [[keys.command]]
+    key = "prefix+u"
+    type = "plugin_action"
+    command = "chmarax.gitview.toggle"
+    description = "gitview na aba atual"
+
+    [[keys.command]]
+    key = "prefix+d"
+    type = "plugin_action"
+    command = "chmarax.gitview.toggle-tab"
+    description = "gitview numa aba"
+
+    [[keys.command]]
+    key = "prefix+a"
+    type = "plugin_action"
+    command = "chmarax.herdr-nvim.toggle"
+    description = "sidebar do nvim"
+
+    [[keys.command]]
+    key = "prefix+f"
+    type = "plugin_action"
+    command = "chmarax.herdr-nvim.pick-file"
+    description = "abrir arquivo que o agente tocou"
+  '';
+
+  # Enter no diff abre o nvim do Nix, sem cair no xdg-open (não há compositor).
+  xdg.configFile."herdr/plugins/config/chmarax.gitview/config.toml".text = ''
+    editor = ["${pkgs.neovim}/bin/nvim"]
+  '';
+
+  # O binário do herdr-nvim procura `nvim` no PATH do servidor. Caminho absoluto
+  # do Neovim do home-manager, para a sidebar achar o editor mesmo com PATH curto.
+  xdg.configFile."herdr-nvim/config.toml".text = ''
+    [sidebar]
+    nvim_bin = "${pkgs.neovim}/bin/nvim"
+  '';
 
   # O próprio home-manager (comando `home-manager`)
   programs.home-manager.enable = true;

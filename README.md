@@ -24,6 +24,7 @@ Branch de longa duração do repositório [my-dotfiles](https://github.com/fabva
 ├── flake.lock         # versões EXATAS de tudo (commite sempre!)
 ├── user.nix           # >>> EDITE: usuário, nome, e-mail <<<
 ├── home.nix           # pacotes, shell, git, aliases
+├── herdr-plugins.nix  # herdr-gitview e herdr-nvim pinados (herdr-chat não entra)
 ├── starship.toml      # prompt vindo do fedora/sway (rótulo @wsl)
 ├── fastfetch/         # config, ASCII arts e random-logo.sh (também do fedora/sway)
 ├── bootstrap.sh       # roda dentro do Ubuntu novo; usa a própria pasta
@@ -47,6 +48,21 @@ O prompt e o fastfetch deste branch são os do Fedora. O home-manager aplica cad
 O branch Fedora **não tinha** aliases, `gitconfig` nem config de Neovim para trazer. Git (`programs.git`), aliases (`ls`/`ll`/`g`/`v`…) e o Neovim sem `init.lua` gerenciado já são deste setup WSL.
 
 Ficou de fora tudo que é desktop/Wayland, porque o WSL desta branch não tem compositor: Sway, SwayFX, swaylock, Noctalia, Vicinae, Kitty, GTK, papéis de parede, `nwg-displays`, `pointer-accel` e a sessão em `system/`. Não havia waybar, wofi nem mako nesse branch (a barra do Fedora é a Noctalia).
+
+## Plugins do herdr
+
+O `herdr` do nixpkgs é o TUI 0.9.5. Nixpkgs não tem pacote `herdr-gitview`, `herdr-nvim` nem `herdr-chat`. Os dois que funcionam neste WSL (terminal, sem Wayland) estão em `herdr-plugins.nix`: fonte no commit do release e binário Linux que o `herdr/install.sh` deles baixa. O home-manager registra os dois em `~/.config/herdr/plugins.json` (`herdr plugin link`) e liga as teclas em `~/.config/herdr/config.toml`. O prefixo do herdr continua `ctrl+b`.
+
+| Tecla | Ação |
+|---|---|
+| `ctrl+b` depois `u` | gitview na aba atual |
+| `ctrl+b` depois `d` | gitview numa aba só dele |
+| `ctrl+b` depois `a` | sidebar do nvim |
+| `ctrl+b` depois `f` | arquivo que o agente tocou |
+
+`~/.config/nvim` segue sem ser gerenciado. A sidebar do herdr-nvim injeta o Lua do plugin sozinha. No nvim do dia a dia, as anotações pedem uma linha no seu plugin manager, quando você quiser: `{ "ChmaraX/herdr-nvim", opts = {} }`.
+
+**herdr-chat não é instalado.** O repositório que acompanha os outros dois, [ChmaraX/herdr-chat](https://github.com/ChmaraX/herdr-chat), é mod do app desktop Herdr (`herdr-app` / `hc`), só macOS: o instalador procura o app em `/Applications` e a área de transferência de imagem usa `osascript`. Não tem `herdr-plugin.toml` e não roda no TUI headless.
 
 ---
 
