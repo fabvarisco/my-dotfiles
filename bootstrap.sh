@@ -92,6 +92,32 @@ confirm_no() { # confirm_no "question" -> 0 = yes (default no)
   [[ "$ans" =~ ^[Yy] ]]
 }
 
+# Nyanca's mark. Cyan only on a real terminal, and never when NO_COLOR is set.
+print_banner() {
+  local cyan="" reset=""
+  if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+    cyan=$'\033[96m'
+    reset=$'\033[0m'
+  fi
+  printf '%s' "$cyan"
+  cat <<'EOF'
+    /\_/\
+   ( o.o )
+  <(  ^  )>
+   /| V |\
+  / |   | \
+ (  |   |  )
+  \_|___|_/
+   /_/ \_\
+  wsl/ubuntu-nix bootstrap  -  crafted by Nyanca  nya~
+EOF
+  printf '%s\n' "$reset"
+}
+
+if [ "${BOOTSTRAP_LIB_ONLY:-}" != 1 ]; then
+  print_banner
+fi
+
 while [ $# -gt 0 ]; do
   case "$1" in
     -y | --yes) ASSUME_YES=1; shift ;;
