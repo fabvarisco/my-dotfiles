@@ -92,10 +92,107 @@ confirm_no() { # confirm_no "question" -> 0 = yes (default no)
   [[ "$ans" =~ ^[Yy] ]]
 }
 
-# Nyanca's mark. Cyan only on a real terminal, and never when NO_COLOR is set.
-print_banner() {
-  local cyan="" reset=""
-  if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+# Nyanca's mark. UTF-8 terminals get the braille cat and an ANSI Shadow title,
+# electric blue fading into cyan. NO_COLOR or a non-TTY prints no ANSI.
+# A non-UTF-8 locale keeps the plain ASCII cat. NO_ANIM=1 or --yes skips
+# the short tagline typewriter.
+banner_locale_utf8() {
+  local charmap lang
+  charmap="$(locale charmap 2>/dev/null || true)"
+  case "$charmap" in
+    UTF-8 | utf-8 | UTF8) return 0 ;;
+  esac
+  lang="${LC_ALL:-${LC_CTYPE:-${LANG:-}}}"
+  case "$lang" in
+    *[Uu][Tt][Ff]-8* | *[Uu][Tt][Ff]8*) return 0 ;;
+  esac
+  return 1
+}
+
+banner_columns() {
+  local cols=""
+  if [ -t 1 ]; then
+    cols="$(tput cols 2>/dev/null || true)"
+  fi
+  if [ -z "$cols" ]; then
+    cols="${COLUMNS:-}"
+  fi
+  case "$cols" in
+    "" | *[!0-9]*) cols=80 ;;
+  esac
+  printf '%s\n' "$cols"
+}
+
+# Green channel for a line of the #0080ff -> #00ffff gradient.
+banner_green() {
+  local i="$1" n="$2" g=128
+  if [ "$n" -gt 1 ]; then
+    g=$((128 + (127 * i / (n - 1))))
+  fi
+  printf '%s\n' "$g"
+}
+
+banner_skip_anim() {
+  local arg
+  if [ ! -t 1 ] || [ "${NO_ANIM:-}" = 1 ] || [ "${ASSUME_YES:-0}" = 1 ]; then
+    return 0
+  fi
+  for arg in "$@"; do
+    case "$arg" in
+      -y | --yes) return 0 ;;
+    esac
+  done
+  return 1
+}
+
+banner_paint() {
+  local index="$1" total="$2" text="$3" color_on="$4" g
+  if [ "$color_on" = 1 ]; then
+    g="$(banner_green "$index" "$total")"
+    printf '\033[1;38;2;0;%d;255m%s\033[0m\n' "$g" "$text"
+  else
+    printf '%s\n' "$text"
+  fi
+}
+
+banner_rule() {
+  local width="$1" color_on="$2" rule="" i=0
+  while [ "$i" -lt "$width" ]; do
+    rule="${rule}━"
+    i=$((i + 1))
+  done
+  if [ "$color_on" = 1 ]; then
+    printf '\033[1;38;2;0;255;255m  %s\033[0m\n' "$rule"
+  else
+    printf '  %s\n' "$rule"
+  fi
+}
+
+banner_tagline() {
+  local text="$1" color_on="$2" skip="$3"
+  local color="" reset="" i=0 len ch
+  if [ "$color_on" = 1 ]; then
+    color=$'\033[1;38;2;208;208;255m'
+    reset=$'\033[0m'
+  fi
+  printf '%s' "$color"
+  if [ "$skip" = 1 ]; then
+    printf '%s' "$text"
+  else
+    len=${#text}
+    while [ "$i" -lt "$len" ]; do
+      ch="${text:i:1}"
+      printf '%s' "$ch"
+      sleep 0.004
+      i=$((i + 1))
+    done
+  fi
+  printf '%s\n' "$reset"
+}
+
+print_banner_ascii() {
+  local color_on="$1" cyan="" reset=""
+  if [ "$color_on" = 1 ]; then
     cyan=$'\033[96m'
     reset=$'\033[0m'
   fi
@@ -114,8 +211,113 @@ EOF
   printf '%s\n' "$reset"
 }
 
+print_banner() {
+  local color_on=0 skip=0 cols side=0
+  local cat_w=0 title_w=0 need=0 rule_w=0
+  local cat_n title_n offset i ti g_cat g_title line
+  local -a cat_lines=() title_lines=()
+  local indent="  "
+
+  if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+    color_on=1
+  fi
+  if ! banner_locale_utf8; then
+    print_banner_ascii "$color_on"
+    return
+  fi
+  if banner_skip_anim "$@"; then
+    skip=1
+  fi
+
+  mapfile -t cat_lines <<'NYANCA_CAT'
+⢀⣠⣤⣤⣤⣤⣄⣀⡀⠀⠀⠀⠀⢀⣀⣠⣤⣤⣤⣤⣤⣄⣀⣀⠀⠀⠀⠀⠀⣀⣀⣤⣤⣤⣤⣄⣀⠀
+⣿⡟⠛⠛⠛⠛⠛⠿⢿⣷⣦⣶⣿⠿⠿⠛⠛⠛⠛⠛⠛⠛⠻⠿⣿⣷⣦⣾⣿⠿⠟⠛⠛⠛⠛⠻⣿⡄
+⣿⡇⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⣿⡇
+⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⡇
+⢻⣿⡀⣰⣦⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⣦⡀⣼⣿⠀
+⠈⣿⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣿⠇⠀
+⠀⣼⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢻⣿⡀⠀
+⢰⣿⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⣇⠀
+⢸⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢹⣿⠀
+⣿⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⠀
+⢸⣿⠀⠀⠀⣴⡆⠀⠀⠀⠀⠀⣴⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣶⠀⠀⠀⠀⠀⢠⣶⠀⠀⠀⢸⣿⠀
+⠸⣿⡄⠀⠀⠹⣿⣄⠀⠀⠀⣠⣿⠃⣠⣄⠀⢀⣤⠀⠀⣠⡄⠀⢿⣧⡀⠀⠀⢀⣼⡿⠀⠀⠀⣿⡏⠀
+⠀⢻⣿⡄⠀⠀⠙⠻⠿⠾⠿⠟⠁⠀⠹⣿⣦⣾⣿⣷⣴⣿⠃⠀⠈⠛⠿⠷⠾⠿⠛⠀⠀⢀⣼⣿⠁⠀
+⠀⠀⠻⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠁⠀⠈⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣾⡿⠁⠀⠀
+⠀⠀⠀⠈⠻⢿⣷⣦⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣤⣴⣶⣿⠟⠋⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠈⠉⠛⠛⠻⠿⢿⣿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠛⠛⠋⠉⠀⠀⠀⠀⠀⠀⠀
+NYANCA_CAT
+  mapfile -t title_lines <<'NYANCA_TITLE'
+███╗   ██╗██╗   ██╗ █████╗ ███╗   ██╗ ██████╗ █████╗
+████╗  ██║╚██╗ ██╔╝██╔══██╗████╗  ██║██╔════╝██╔══██╗
+██╔██╗ ██║ ╚████╔╝ ███████║██╔██╗ ██║██║     ███████║
+██║╚██╗██║  ╚██╔╝  ██╔══██║██║╚██╗██║██║     ██╔══██║
+██║ ╚████║   ██║   ██║  ██║██║ ╚████║╚██████╗██║  ██║
+╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝
+NYANCA_TITLE
+
+  cat_n=${#cat_lines[@]}
+  title_n=${#title_lines[@]}
+  for line in "${cat_lines[@]}"; do
+    if [ "${#line}" -gt "$cat_w" ]; then
+      cat_w=${#line}
+    fi
+  done
+  for line in "${title_lines[@]}"; do
+    if [ "${#line}" -gt "$title_w" ]; then
+      title_w=${#line}
+    fi
+  done
+  need=$((cat_w + 2 + title_w))
+  cols="$(banner_columns)"
+  if [ "$cols" -ge 90 ] && [ "$cols" -ge "$need" ]; then
+    side=1
+  fi
+  offset=$(((cat_n - title_n) / 2))
+  if [ "$offset" -lt 0 ]; then
+    offset=0
+  fi
+
+  i=0
+  while [ "$i" -lt "$cat_n" ]; do
+    ti=$((i - offset))
+    if [ "$side" = 1 ] && [ "$ti" -ge 0 ] && [ "$ti" -lt "$title_n" ]; then
+      if [ "$color_on" = 1 ]; then
+        g_cat="$(banner_green "$i" "$cat_n")"
+        g_title="$(banner_green "$ti" "$title_n")"
+        printf '\033[1;38;2;0;%d;255m%s%s\033[0m  \033[1;38;2;0;%d;255m%s\033[0m\n' \
+          "$g_cat" "$indent" "${cat_lines[$i]}" "$g_title" "${title_lines[$ti]}"
+      else
+        printf '%s%s  %s\n' "$indent" "${cat_lines[$i]}" "${title_lines[$ti]}"
+      fi
+    else
+      banner_paint "$i" "$cat_n" "${indent}${cat_lines[$i]}" "$color_on"
+    fi
+    i=$((i + 1))
+  done
+
+  if [ "$side" = 1 ]; then
+    rule_w=$need
+  else
+    printf '\n'
+    i=0
+    while [ "$i" -lt "$title_n" ]; do
+      banner_paint "$i" "$title_n" "${indent}${title_lines[$i]}" "$color_on"
+      i=$((i + 1))
+    done
+    if [ "$title_w" -gt "$cat_w" ]; then
+      rule_w=$title_w
+    else
+      rule_w=$cat_w
+    fi
+  fi
+
+  banner_rule "$rule_w" "$color_on"
+  banner_tagline '  >> wsl/ubuntu-nix bootstrap // crafted by Nyanca  ฅ^•ﻌ•^ฅ  nya~' "$color_on" "$skip"
+}
+
 if [ "${BOOTSTRAP_LIB_ONLY:-}" != 1 ]; then
-  print_banner
+  print_banner "$@"
 fi
 
 while [ $# -gt 0 ]; do
