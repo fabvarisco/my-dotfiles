@@ -1,3 +1,5 @@
+# Prompt from fedora/sway (palette lock_dusk). Username label is @wsl here.
+# home-manager writes ~/.config/starship.toml from programs.starship.settings.
 format = """
 $username\
 $directory\
@@ -42,7 +44,7 @@ error_symbol = "[❯](fg:red)"
 show_always = true
 style_user = "fg:purple bold"
 style_root = "fg:red bold"
-format = '[\[$user@fedora\]]($style_user) '
+format = '[\[$user@wsl\]]($style_user) '
 
 [directory]
 style = "fg:cyan"

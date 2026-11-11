@@ -1,0 +1,49 @@
+# ============================================================================
+#  .wslconfig  (arquivo so em ASCII de proposito: o parser do WSL e chato)
+#  .wslconfig  vai em C:\Users\<SeuUsuario>\.wslconfig  (o setup.ps1 copia)
+#  Vale pra TODAS as distros WSL2. Depois de mudar: `wsl --shutdown` e espere
+#  ~8 segundos antes de abrir de novo.
+#  Referencia: https://learn.microsoft.com/windows/wsl/wsl-config
+# ============================================================================
+
+[wsl2]
+# RAM maxima da VM do WSL. Padrao = 50% da RAM do Windows.
+# Regra pratica: metade da RAM (16 GB -> 8GB, 32 GB -> 16GB). AJUSTE AO SEU PC.
+memory=8GB
+
+# Nucleos logicos que o WSL pode usar. Padrao = todos. Deixe uns livres pro Windows.
+# AJUSTE: ex. 12 threads -> 8.
+processors=8
+
+# Swap (arquivo no disco). 0 desliga. 4GB evita OOM em builds pesados do Nix.
+swap=4GB
+
+# Rede "mirrored": WSL enxerga as mesmas interfaces do Windows.
+#  - localhost funciona nos DOIS sentidos (dev server do WSL abre no navegador do Windows)
+#  - funciona melhor com VPN
+networkingMode=mirrored
+
+# DNS via Windows (resolve problemas de DNS com VPN). Padrao ja e true.
+dnsTunneling=true
+
+# Respeita o proxy do Windows, se houver.
+autoProxy=true
+
+# Firewall do Windows filtra o trafego do WSL (seguro; padrao true).
+firewall=true
+
+# GUI de apps Linux (WSLg). Mantido ligado caso queira rodar o Zed Linux.
+guiApplications=true
+
+[experimental]
+# Devolve pro Windows a RAM de cache que o Linux nao esta usando.
+# "gradual" = devagar e sem travadas. (Outras opcoes: dropCache, disabled)
+autoMemoryReclaim=gradual
+
+# VHD novo ja nasce "sparse": quando voce apaga arquivos no Linux, o .vhdx
+# encolhe no disco do Windows. So afeta distros instaladas DEPOIS desta config
+# (por isso copie este arquivo ANTES do `wsl --install`).
+sparseVhd=true
+
+# Com mirrored: permite Windows <-> WSL se falarem pelo IP da maquina (nao so localhost).
+hostAddressLoopback=true

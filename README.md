@@ -1,121 +1,252 @@
-# Dotfiles
+# wsl/ubuntu-nix 🐧❄️
 
-Fedora Sway session, with packages and configuration managed by Home Manager. The graphical session compositor is SwayFX from Nix. Noctalia draws the bar, the wallpaper, and the panel launcher. Vicinae is the application launcher and clipboard history.
+Ambiente de dev **reprodutível** no Windows: se o WSL quebrar, você apaga e recria
+tudo igualzinho em ~15 minutos.
 
-Tested on Fedora 44 Sway with SDDM.
+Branch de longa duração do repositório [my-dotfiles](https://github.com/fabvarisco/my-dotfiles), ao lado de `nixos/hyprland`, `fedora/sway` e `windows/glazewm-yasb`. Este branch **não é para merge** — ele vive sozinho, como os outros.
 
-`home.nix` uses paths relative to itself (`./sway`, `./kitty`, `./noctalia`). Home Manager reads `~/.config/home-manager/home.nix`, so the whole repository lives in that directory.
+**Stack:** Ubuntu 26.04 LTS (WSL2) + Nix (instalador Determinate) + home-manager (flake) + devenv por projeto.
 
-## Installation
+| O quê | Como vem |
+|---|---|
+| Shell | zsh + starship + autosuggestions + syntax highlighting + fzf + zoxide |
+| CLI | ripgrep, fd, bat, eza, jq, curl, wget, unzip, zip, tree, htop, git, gh, lazygit |
+| Editores | **Neovim** (Nix) · **Zed** (app do Windows conectado no WSL) |
+| **herdr** | multiplexer de terminal para agentes de IA (nixpkgs) |
+| IAs | `claude` (Claude Code), `codex` (OpenAI Codex CLI), `opencode` (todos do nixpkgs) |
+| Linguagens globais | Node 26 (LTS), Python 3, uv (fallback; por projeto use devenv) |
+| Por projeto | devenv + direnv + nix-direnv (`templates/node`, `templates/python`) |
+| Sem | Docker, GPU/CUDA, compositor (Sway/Wayland) |
 
-### 1. Fedora packages
-
-The Sway spin already includes most of these. Install the ones the configuration calls by a fixed path:
-
-```sh
-sudo dnf install \
-  sway swayidle swaylock sway-systemd sddm sddm-wayland-sway \
-  lxqt-policykit brightnessctl playerctl xdg-user-dirs procps-ng \
-  pipewire-pulseaudio pulseaudio-utils \
-  nix rpm-build
+```
+.
+├── flake.nix          # entradas (nixpkgs-unstable + home-manager), travadas no flake.lock
+├── flake.lock         # versões EXATAS de tudo (commite sempre!)
+├── user.nix           # >>> EDITE: usuário, nome, e-mail <<<
+├── home.nix           # pacotes, shell, git, aliases
+├── starship.toml      # prompt vindo do fedora/sway (rótulo @wsl)
+├── fastfetch/         # config, ASCII arts e random-logo.sh (também do fedora/sway)
+├── bootstrap.sh       # roda dentro do Ubuntu novo; usa a própria pasta
+├── windows/
+│   ├── .wslconfig     # limites de RAM/CPU, rede mirrored, VHD sparse
+│   └── setup.ps1      # instala WSL/Ubuntu-26.04, copia .wslconfig, instala Zed
+└── templates/
+    ├── node/          # devenv.nix + devenv.yaml + .envrc + .gitignore
+    └── python/        # idem, com uv
 ```
 
-Thunar is optional. `home.nix` installs the Tela grey dark icon theme for it.
+## O que veio do `fedora/sway`
 
-`swaylock` from dnf stays for `/etc/pam.d/swaylock`. The session locks with Nix's `swaylock-effects`, installed by `home.nix`. That binary is also named `swaylock`.
+O prompt e o fastfetch deste branch são os do Fedora. O home-manager aplica cada um **uma vez** (sem `~/.bashrc.d` paralelo e sem um segundo `starship.toml`):
 
-### 2. `sway-config-nix` session
+| Peça | Como entrou aqui |
+|---|---|
+| **Starship** | `starship.toml` (paleta `lock_dusk`, prompt numa linha) vira `programs.starship.settings`, com integração só no zsh. O rótulo do usuário passou de `@fedora` para `@wsl`. O formato `nix_shell` deste setup WSL continua, para aparecer dentro de `nix shell` / devenv. |
+| **fastfetch** | `fastfetch/config.jsonc`, os três ASCII arts e o `random-logo.sh`. O pacote vem de `programs.fastfetch`; os arquivos, de `xdg.configFile` (o módulo não gera outro `config.jsonc`). No Fedora o script rodava no início do bash; aqui roda no fim do zsh interativo. A logo embutida sorteada junto com os ASCII arts passou de `fedora` para `ubuntu`. |
 
-The package in `system/` installs `start-sway` and the Wayland session entry. It provides `sway-config`, replaces `sway-config-fedora`, and removes Waybar. Noctalia is the bar.
+O branch Fedora **não tinha** aliases, `gitconfig` nem config de Neovim para trazer. Git (`programs.git`), aliases (`ls`/`ll`/`g`/`v`…) e o Neovim sem `init.lua` gerenciado já são deste setup WSL.
 
-```sh
-cd system
-rpmbuild -bb \
-  --define "_sourcedir $(pwd)" \
-  --define "_rpmdir $(pwd)/rpm" \
-  sway-config-nix.spec
-sudo dnf install ./rpm/noarch/sway-config-nix-1-2.noarch.rpm
+Ficou de fora tudo que é desktop/Wayland, porque o WSL desta branch não tem compositor: Sway, SwayFX, swaylock, Noctalia, Vicinae, Kitty, GTK, papéis de parede, `nwg-displays`, `pointer-accel` e a sessão em `system/`. Não havia waybar, wofi nem mako nesse branch (a barra do Fedora é a Noctalia).
+
+---
+
+## 0. Antes de tudo: edite `user.nix`
+
+```nix
+username = "hitsu";               # = usuário Linux que você vai criar no Ubuntu
+fullName = "Fabricio Varisco";
+email    = "fabricio.varisco@outlook.com";
 ```
 
-`start-sway` runs `~/.nix-profile/bin/sway` when that binary exists. Fedora's `/usr/bin/sway` stays on the system for the SDDM greeter.
+(Se o `username` não bater com o seu usuário, o `bootstrap.sh` oferece corrigir sozinho.)
 
-This package does not install `/etc/sway/config`. Run the `home-manager switch` from section 4 before ending the current session.
+Suba este repo pro **seu GitHub** (privado tá ótimo). Ele é o seu backup de verdade.
 
-`system/start-sway` is derived from the Fedora Sway SIG script, under the MIT license in `system/LICENSE`.
+---
 
-### 3. Nix and Home Manager
+## 1. Do Windows zerado até o terminal pronto
 
-Fedora's `nix` package enables flakes and points `<nixpkgs>` at `flake:nixpkgs`. Log in again, or load the profile in the current shell:
+### 1.1 No Windows (PowerShell)
 
-```sh
-source /etc/profile.d/nix.sh
+```powershell
+# na pasta do repo (baixado/clonado no Windows)
+powershell -ExecutionPolicy Bypass -File .\windows\setup.ps1
 ```
 
-Home Manager for this configuration is the one that tracks nixpkgs unstable (26.11-pre when this setup was written). `home.stateVersion` stays `"24.11"`. That value records the release the configuration was created on.
+Ele faz: `wsl --update` → copia `windows\.wslconfig` para `%USERPROFILE%\.wslconfig`
+(com backup do antigo) → `wsl --install -d Ubuntu-26.04` → `winget install ZedIndustries.Zed`.
 
-```sh
-nix run nixpkgs#home-manager -- --version
+> ⚠️ **Ajuste `memory` e `processors` no `.wslconfig`** pro seu PC (padrão do arquivo: 8GB / 8 núcleos).
+> Se for a 1ª vez com WSL, o Windows pode pedir reinício; depois rode o script de novo.
+
+Quer fazer na mão?
+
+```powershell
+wsl --install -d Ubuntu-26.04     # nomes disponíveis: wsl --list --online
+copy windows\.wslconfig $env:USERPROFILE\.wslconfig
 ```
 
-### 4. Configuration and the first switch
+Na 1ª abertura do Ubuntu ele pede **usuário e senha** → use o mesmo `username` do `user.nix`.
 
-```sh
-git clone -b fedora/sway https://github.com/fabvarisco/my-dotfiles.git ~/Developer/my-dotfiles
-ln -s ~/Developer/my-dotfiles ~/.config/home-manager
-nix run nixpkgs#home-manager -- switch
+### 1.2 Dentro do Ubuntu
+
+```bash
+git clone -b wsl/ubuntu-nix https://github.com/fabvarisco/my-dotfiles
+cd my-dotfiles
+./bootstrap.sh
 ```
 
-If `~/.config/home-manager` already exists and is not this repository, move it aside before the `ln`. Files Home Manager would take over that are already in `$HOME` can be moved aside with `home-manager switch -b backup`.
+A pasta pode ter outro nome (`git clone -b wsl/ubuntu-nix https://github.com/fabvarisco/my-dotfiles meu-wsl` e `cd meu-wsl`). O `bootstrap.sh` usa o diretório do próprio script — não procura `~/hitsu-wsl-setup`. Ele grava esse caminho em `~/.local/share/wsl-nix/flake-dir`, e os atalhos `hms` / `hmu` leem o arquivo.
 
-The first switch downloads Cursor, Zen Browser, Noctalia, SwayFX, and the wallpapers. Cursor is unfree; `nixpkgs.config.allowUnfree` is already enabled in `home.nix`.
+Se o clone estiver em `/mnt/c/...` (disco do Windows), o script copia para `~/<nome-da-pasta>` e continua de lá. Projetos e este repo ficam no disco do Linux.
 
-After the switch, `home-manager` is on `~/.nix-profile/bin`. Log out to SDDM and start the Sway session.
+O `bootstrap.sh`:
+1. `apt` só com o mínimo (curl, git, xz, zsh, build-essential, locales)
+2. confere se o systemd está ligado (Ubuntu no WSL já vem com ele)
+3. instala o Nix pelo instalador da Determinate Systems (flakes já ligados)
+4. coloca seu usuário em `trusted-users` (pro cache binário do devenv funcionar)
+5. `home-manager switch` → instala TUDO da tabela lá em cima
+6. troca seu shell para zsh
+7. mostra os próximos passos
 
-## Updating
+Pode rodar de novo à vontade (é idempotente). `./bootstrap.sh --yes` não pergunta nada.
 
-`~/.config/home-manager` is this repository. Edit the files here, then apply them:
+### 1.3 Logins (uma vez)
 
-```sh
-home-manager switch
+```bash
+exec zsh -l             # ou feche e abra o terminal
+gh auth login           # GitHub (também vira o credential helper do git)
+claude                  # Claude Code — o login abre no navegador do Windows
+codex login             # OpenAI Codex CLI
+opencode auth login     # opencode
+herdr                   # ctrl+b q desanexa; `herdr` de novo reanexa
 ```
 
-`Super+Shift+c` reloads Sway. A new compositor binary, a change to `sway/environment`, or a systemd user unit needs a new login. Kitty and Thunar read their configuration when they start, so reopen those.
+> O navegador do Windows abre via `wsl-open` (`$BROWSER`). Se algum login não abrir
+> sozinho, copie a URL que aparece no terminal e cole no navegador.
 
-These files are created empty (or with the default pointer speed) and later switches leave them in place:
+---
 
-- `~/.config/sway/outputs` — monitors, written by `nwg-displays` (`Super+p`)
-- `~/.config/sway/workspaces`
-- `~/.config/sway/pointer.conf` — `pointer-accel 0.3` (from `-1.0` to `1.0`)
+## 2. Zed: qual jeito usar? → **Zed do Windows + WSL remoto** ✅
 
-## Another user or laptop
+O Zed para Windows abre pastas **dentro do WSL nativamente** (docs:
+<https://zed.dev/docs/remote-development> → "WSL Support"). A UI roda no Windows (GPU, fontes,
+atalhos nativos) e um servidor do Zed roda no Ubuntu — LSPs, terminal e git ficam no Linux.
 
-Edit these before the first switch:
+- Abrir: `Ctrl+Shift+P` → **`projects: open wsl`** → escolha `Ubuntu-26.04` → pasta (ex.: `~/code/meu-app`).
+- Pasta que já está no Windows: `projects: open folder in wsl`.
+- Depois, fica em **Remote Projects** pra abrir com 1 clique.
+- devenv/direnv: o Zed carrega o `.envrc` do projeto pros language servers (configuração `load_direnv`,
+  padrão "direct"). Rode `direnv allow` uma vez no terminal antes.
 
-| File | What to change |
-| --- | --- |
-| `home.nix` | `home.username` and `home.homeDirectory` |
-| `swaylock/config` | lock screen: blurred screenshot, clock, Kitty gray palette |
-| `noctalia/config.toml` | `wallpaper.directory`, city, and coordinates |
-| `sway/environment` | `TZ`, when it should not be `America/Sao_Paulo` |
-| `sway/config.d/30-lid.conf` | internal display name, when it is not `eDP-1` (`swaymsg -t get_outputs`) |
+**Por que não rodar o Zed Linux dentro do WSL (WSLg)?** Funciona, mas é renderizado por
+WSLg (sem aceleração nativa, janela "estrangeira", clipboard/IME/HiDPI mais frágeis). Se mesmo
+assim quiser: descomente `zed-editor` em `home.nix` e rode `hms`; o comando é `zeditor`.
 
-Leave `home.stateVersion` at `"24.11"`.
+---
 
-## Key bindings
+## 3. Dia a dia
 
-`Super` is the modifier. The rest follows the usual i3/Sway layout (focus on `hjkl`, workspaces on the number keys, `Super+Shift+e` to exit).
+| Quero... | Comando |
+|---|---|
+| Aplicar mudança no `home.nix` / `user.nix` | `hms` |
+| Atualizar **todos** os pacotes | `hmu` (= `nix flake update` + `home-manager switch`) |
+| Adicionar um programa | coloque em `home.packages` no `home.nix` → `hms` → `git commit` |
+| Procurar um pacote | `nix search nixpkgs <nome>` ou <https://search.nixos.org> |
+| Testar algo sem instalar | `nix shell nixpkgs#cowsay -c cowsay oi` |
+| LazyVim (opcional) | `lazyvim-init` (só se `~/.config/nvim` não existir) |
+| Abrir pasta no Explorer | `explorer` |
 
-| Binding | Action |
-| --- | --- |
-| `Super+Enter` | Kitty |
-| `Super+d` | Noctalia launcher |
-| `Alt+Space` | Vicinae |
-| `Super+v` | clipboard history |
-| `Super+n` | control center |
-| `Super+,` | Noctalia settings |
-| `Super+p` | arrange monitors |
-| `Super+Shift+s` | region screenshot |
-| `Super+Print` | full-screen screenshot |
-| `Super+Shift+c` | reload the configuration |
-| `Super+q` | close the window |
-| `Super+l` | lock the screen |
+Depois de `hmu`, **commite o `flake.lock`** — é ele que garante que outra máquina fique idêntica.
+
+### Projeto novo com devenv
+
+```bash
+# na pasta do clone (my-dotfiles, ou o nome que você deu)
+mkdir -p ~/code && cp -r templates/node ~/code/meu-app   # ou templates/python
+cd ~/code/meu-app
+direnv allow            # 1ª vez baixa as coisas; depois entra em <100 ms
+```
+
+- Troque a versão no `devenv.nix` (`pkgs.nodejs_22/24/26`, `pkgs.python312/313/314`).
+- Serviços sem Docker: `services.postgres.enable = true;` → `devenv up`.
+- Scripts: `dev` (node) / `tests` (python) já vêm de exemplo.
+- Commite `devenv.nix`, `devenv.yaml`, `devenv.lock` e `.envrc`.
+- Opções: <https://devenv.sh/reference/options/>
+
+---
+
+## 4. Rollback (deu ruim depois de atualizar)
+
+```bash
+home-manager generations                 # lista: data, id, caminho
+/nix/store/<hash>-home-manager-generation/activate   # volta pra uma geração anterior
+```
+
+Ou pelo git (melhor): `git checkout <commit-bom> -- flake.lock home.nix && hms`.
+
+Limpar gerações velhas e liberar disco:
+
+```bash
+home-manager expire-generations "-30 days"
+nix-collect-garbage
+```
+
+---
+
+## 5. Backup e restauração
+
+**Backup de verdade = este repo no GitHub** (config) + seus projetos no GitHub.
+Se o WSL morrer: `wsl --unregister Ubuntu-26.04`, reinstala, `./bootstrap.sh`. Pronto.
+
+Backup da distro inteira (inclui arquivos soltos em `~`), no PowerShell:
+
+```powershell
+wsl --shutdown
+wsl --export Ubuntu-26.04 D:\backup\ubuntu-2604.tar
+# restaurar (em outra pasta/PC):
+wsl --import Ubuntu-26.04 C:\WSL\Ubuntu-26.04 D:\backup\ubuntu-2604.tar
+```
+
+Depois de `--import` o WSL entra como **root**. Conserte com:
+
+```bash
+printf '[user]\ndefault=hitsu\n' | sudo tee -a /etc/wsl.conf    # troque hitsu
+```
+
+e `wsl --shutdown` no PowerShell.
+
+---
+
+## 6. Pegadinhas do WSL (leia!)
+
+- **Projetos SEMPRE em `~/` (ex.: `~/code`), nunca em `/mnt/c/...`.** O disco do Windows via WSL é
+  muito mais lento (npm install, git status, LSP) e quebra permissões/watchers.
+  Acessar os arquivos do Linux pelo Explorer: `\\wsl$\Ubuntu-26.04\home\hitsu` (ou `explorer` no terminal).
+- **Não instale Node/Python no Windows "pra usar no WSL".** Dentro do WSL o PATH do Windows entra
+  no final; os do Nix vêm primeiro, mas evite confusão: `which node` deve apontar pra `~/.nix-profile`
+  ou `/nix/store`.
+- **CRLF:** o `.gitattributes` força LF (e CRLF no `windows/setup.ps1`, que também leva BOM UTF-8). Se clonar no Windows com `core.autocrlf=true`, o
+  `bootstrap.sh` quebra (`/bin/bash^M`). Clone **dentro** do WSL.
+- **Mudou o `.wslconfig`?** `wsl --shutdown` e espere ~8 s.
+- **`sparseVhd`** só vale pra distro criada depois do `.wslconfig` — por isso o `setup.ps1` copia antes de instalar.
+- **Rede mirrored:** `localhost:3000` do WSL abre direto no navegador do Windows (e vice-versa).
+- **Arquivos novos no flake:** o Nix só enxerga arquivos rastreados pelo git → `git add` antes do `hms`.
+- **Atualizações das IAs:** `claude`/`codex`/`opencode` vêm do Nix; o auto-update interno delas não
+  funciona (o do Claude já vem desligado). Atualize com `hmu`. Se o nixpkgs atrasar e você precisar
+  de uma versão do dia, use os instaladores oficiais temporariamente:
+  - Claude Code: `curl -fsSL https://claude.ai/install.sh | bash` · <https://code.claude.com/docs/en/setup>
+  - Codex: `curl -fsSL https://chatgpt.com/codex/install.sh | sh` · <https://github.com/openai/codex>
+  - opencode: `curl -fsSL https://opencode.ai/v2/install | bash` · <https://opencode.ai>
+  - herdr: `curl -fsSL https://herdr.dev/install.sh | sh` · <https://github.com/herdrdev/herdr>
+  (o `~/.local/bin` fica DEPOIS do Nix no PATH; pra usar a versão manual, tire o pacote do `home.nix` e rode `hms`. Confira com `which -a claude`.)
+- **NixOS-WSL?** Dá pra ter como 2ª distro pra brincar, mas binários prontos (npm/pip com
+  binários, SDKs) precisam de `nix-ld`. Por isso a base aqui é Ubuntu.
+
+---
+
+## 7. Desinstalar o Nix (se um dia quiser)
+
+```bash
+/nix/nix-installer uninstall
+```
