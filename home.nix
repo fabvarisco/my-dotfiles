@@ -67,6 +67,12 @@ in
     nixfmt
     nil
 
+    # Chibi signature. `nyanca` prints assets/nyanca-chibi.ans.
+    (writeShellScriptBin "nyanca" ''
+      export NYANCA_ART=${./assets/nyanca-chibi.ans}
+      exec ${bash}/bin/bash ${./assets/nyanca.sh} "$@"
+    '')
+
     # --- Zed INSIDE WSL (via WSLg) — left off on purpose.
     # Recommended: native Windows Zed + "Open WSL" (see the README).
     # Uncomment if you want to run Linux Zed through WSLg:

@@ -92,10 +92,11 @@ confirm_no() { # confirm_no "question" -> 0 = yes (default no)
   [[ "$ans" =~ ^[Yy] ]]
 }
 
-# Nyanca's mark. UTF-8 terminals get the braille cat and an ANSI Shadow title,
-# electric blue fading into cyan. NO_COLOR or a non-TTY prints no ANSI.
-# A non-UTF-8 locale keeps the plain ASCII cat. NO_ANIM=1 or --yes skips
-# the short tagline typewriter.
+# Nyanca's mark. A truecolor UTF-8 TTY at least 110 columns wide gets the
+# chibi beside the block title; 50–109 columns stack the title under the
+# chibi. Otherwise the braille cat, electric blue fading into cyan. A locale
+# that is not UTF-8 keeps the plain ASCII cat. NO_COLOR or a non-TTY prints
+# no ANSI. NO_ANIM=1 or --yes skips the short tagline typewriter.
 banner_locale_utf8() {
   local charmap lang
   charmap="$(locale charmap 2>/dev/null || true)"
@@ -105,6 +106,13 @@ banner_locale_utf8() {
   lang="${LC_ALL:-${LC_CTYPE:-${LANG:-}}}"
   case "$lang" in
     *[Uu][Tt][Ff]-8* | *[Uu][Tt][Ff]8*) return 0 ;;
+  esac
+  return 1
+}
+
+banner_truecolor() {
+  case "${COLORTERM:-}" in
+    truecolor | 24bit) return 0 ;;
   esac
   return 1
 }
@@ -190,6 +198,108 @@ banner_tagline() {
   printf '%s\n' "$reset"
 }
 
+# Visible columns of a line that may contain SGR sequences.
+banner_vis_width() {
+  local plain
+  plain="$(printf '%s' "$1" | sed -E 's/\x1b\[[0-9;]*[[:alpha:]]//g')"
+  printf '%s\n' "${#plain}"
+}
+
+banner_pad() {
+  local text="$1" width="$2" vis pad
+  vis="$(banner_vis_width "$text")"
+  pad=$((width - vis))
+  if [ "$pad" -gt 0 ]; then
+    printf '%s%*s' "$text" "$pad" ""
+  else
+    printf '%s' "$text"
+  fi
+}
+
+# Chibi on the left (or above) when the art file is present. Returns 1 if it
+# cannot draw, so the caller falls back to the braille cat.
+print_banner_chibi() {
+  local cols="$1" skip="$2"
+  local art dir n chibi_w vis i line j g colored
+  local title_n side block_h off tag_at left
+  local -a chibi=() title_lines=() right=()
+
+  dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)" || return 1
+  art="$dir/assets/nyanca-chibi.ans"
+  [ -f "$art" ] || return 1
+  mapfile -t chibi < "$art"
+  n=${#chibi[@]}
+  [ "$n" -gt 0 ] || return 1
+
+  mapfile -t title_lines <<'NYANCA_TITLE'
+███╗   ██╗██╗   ██╗ █████╗ ███╗   ██╗ ██████╗ █████╗
+████╗  ██║╚██╗ ██╔╝██╔══██╗████╗  ██║██╔════╝██╔══██╗
+██╔██╗ ██║ ╚████╔╝ ███████║██╔██╗ ██║██║     ███████║
+██║╚██╗██║  ╚██╔╝  ██╔══██║██║╚██╗██║██║     ██╔══██║
+██║ ╚████║   ██║   ██║  ██║██║ ╚████║╚██████╗██║  ██║
+╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝
+NYANCA_TITLE
+
+  chibi_w=0
+  for line in "${chibi[@]}"; do
+    vis="$(banner_vis_width "$line")"
+    if [ "$vis" -gt "$chibi_w" ]; then
+      chibi_w=$vis
+    fi
+  done
+  title_n=${#title_lines[@]}
+  side=0
+  if [ "$cols" -ge 110 ]; then
+    side=1
+  fi
+
+  if [ "$side" = 1 ]; then
+    block_h=$((title_n + 2))
+    off=$(((n - block_h) / 2))
+    if [ "$off" -lt 0 ]; then
+      off=0
+    fi
+    i=0
+    while [ "$i" -lt "$n" ]; do
+      right+=("")
+      i=$((i + 1))
+    done
+    j=0
+    while [ "$j" -lt "$title_n" ]; do
+      g="$(banner_green "$j" "$title_n")"
+      printf -v colored '\033[1;38;2;0;%d;255m%s\033[0m' "$g" "${title_lines[$j]}"
+      right[off + j]=$colored
+      j=$((j + 1))
+    done
+    tag_at=$((off + title_n + 1))
+    if [ "$tag_at" -ge "$n" ]; then
+      tag_at=$((n - 1))
+    fi
+    right[tag_at]=$'\001'
+    i=0
+    while [ "$i" -lt "$n" ]; do
+      left="$(banner_pad "${chibi[$i]}" "$chibi_w")"
+      printf '%s  ' "$left"
+      if [ "${right[$i]}" = $'\001' ]; then
+        banner_tagline '  >> wsl/ubuntu-nix bootstrap // crafted by Nyanca  ฅ^•ﻌ•^ฅ  nya~' 1 "$skip"
+      else
+        printf '%s\n' "${right[$i]}"
+      fi
+      i=$((i + 1))
+    done
+  else
+    printf '%s\n' "${chibi[@]}"
+    printf '\n'
+    j=0
+    while [ "$j" -lt "$title_n" ]; do
+      banner_paint "$j" "$title_n" "${title_lines[$j]}" 1
+      j=$((j + 1))
+    done
+    banner_tagline '  >> wsl/ubuntu-nix bootstrap // crafted by Nyanca  ฅ^•ﻌ•^ฅ  nya~' 1 "$skip"
+  fi
+  return 0
+}
+
 print_banner_ascii() {
   local color_on="$1" cyan="" reset=""
   if [ "$color_on" = 1 ]; then
@@ -227,6 +337,13 @@ print_banner() {
   fi
   if banner_skip_anim "$@"; then
     skip=1
+  fi
+
+  cols="$(banner_columns)"
+  if [ "$color_on" = 1 ] && banner_truecolor && [ "$cols" -ge 50 ]; then
+    if print_banner_chibi "$cols" "$skip"; then
+      return
+    fi
   fi
 
   mapfile -t cat_lines <<'NYANCA_CAT'
