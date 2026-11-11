@@ -13,19 +13,67 @@
 set -euo pipefail
 
 ASSUME_YES=0
-for arg in "$@"; do
-  case "$arg" in
-    -y | --yes) ASSUME_YES=1 ;;
-    -h | --help)
-      sed -n '2,12p' "$0"
-      exit 0
-      ;;
-    *)
-      echo "unknown flag: $arg" >&2
-      exit 2
-      ;;
-  esac
-done
+CONFIGURE_ONLY=0
+RECONFIGURE=0
+FLAG_USER="${WSL_NIX_USER:-}"
+FLAG_NAME="${WSL_NIX_NAME:-}"
+FLAG_EMAIL="${WSL_NIX_EMAIL:-}"
+FLAG_EDITOR="${WSL_NIX_EDITOR:-}"
+FLAG_EDITOR_CMD="${WSL_NIX_EDITOR_CMD:-}"
+FLAG_BRANCH="${WSL_NIX_GIT_BRANCH:-}"
+FLAG_AI="${WSL_NIX_AI:-}"
+FLAG_HERDR="${WSL_NIX_HERDR:-}"
+FLAG_FASTFETCH="${WSL_NIX_FASTFETCH:-}"
+FLAG_ZSH="${WSL_NIX_ZSH:-}"
+SET_USER=0
+SET_NAME=0
+SET_EMAIL=0
+SET_EDITOR=0
+SET_EDITOR_CMD=0
+SET_BRANCH=0
+SET_AI=0
+SET_HERDR=0
+SET_FASTFETCH=0
+SET_ZSH=0
+[ -n "$FLAG_USER" ] && SET_USER=1
+[ -n "$FLAG_NAME" ] && SET_NAME=1
+[ -n "$FLAG_EMAIL" ] && SET_EMAIL=1
+[ -n "$FLAG_EDITOR" ] && SET_EDITOR=1
+[ -n "$FLAG_EDITOR_CMD" ] && SET_EDITOR_CMD=1
+[ -n "$FLAG_BRANCH" ] && SET_BRANCH=1
+[ -n "$FLAG_AI" ] && SET_AI=1
+[ -n "$FLAG_HERDR" ] && SET_HERDR=1
+[ -n "$FLAG_FASTFETCH" ] && SET_FASTFETCH=1
+[ -n "$FLAG_ZSH" ] && SET_ZSH=1
+
+print_help() {
+  cat <<'EOF'
+bootstrap.sh — set up this Ubuntu WSL clone.
+
+  ./bootstrap.sh [options]
+
+Options:
+  -y, --yes            Use detected/saved defaults and do not ask
+  --configure-only     Write the per-user file and exit (no apt, Nix, or switch)
+  --reconfigure        Walk through the prompts again (saved answers are the defaults)
+  --user NAME          Linux username (default: $USER or WSL_NIX_USER)
+  --name NAME          Git full name (WSL_NIX_NAME)
+  --email ADDR         Git email (WSL_NIX_EMAIL)
+  --editor CHOICE      nvim, zed, or other (WSL_NIX_EDITOR)
+  --editor-cmd CMD     Command used when --editor other (WSL_NIX_EDITOR_CMD)
+  --git-branch NAME    git init.defaultBranch (WSL_NIX_GIT_BRANCH)
+  --ai LIST            Comma-separated claude-code,codex,opencode, or all, or none (WSL_NIX_AI)
+  --herdr / --no-herdr Install herdr and its plugins (WSL_NIX_HERDR=yes|no)
+  --fastfetch / --no-fastfetch
+                       Run fastfetch when zsh starts (WSL_NIX_FASTFETCH=yes|no)
+  --zsh / --no-zsh     Make zsh the login shell (WSL_NIX_ZSH=yes|no)
+  -h, --help           Show this help
+
+Answers are saved to ~/.config/wsl-nix/user.nix and copied to ./user.nix.
+./user.nix stays tracked so Nix can read it, and is marked skip-worktree so
+your answers are not committed. See user.nix.example and the README.
+EOF
+}
 
 c_green=$'\033[32m'; c_yellow=$'\033[33m'; c_red=$'\033[31m'; c_reset=$'\033[0m'
 step() { printf '\n%s==>%s %s\n' "$c_green" "$c_reset" "$*"; }
@@ -37,6 +85,51 @@ confirm() { # confirm "question" -> 0 = yes (default yes)
   read -r -p "$1 [Y/n] " ans || true
   [[ -z "$ans" || "$ans" =~ ^[Yy] ]]
 }
+confirm_no() { # confirm_no "question" -> 0 = yes (default no)
+  [ "$ASSUME_YES" = 1 ] && return 1
+  local ans
+  read -r -p "$1 [y/N] " ans || true
+  [[ "$ans" =~ ^[Yy] ]]
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -y | --yes) ASSUME_YES=1; shift ;;
+    --configure-only) CONFIGURE_ONLY=1; shift ;;
+    --reconfigure) RECONFIGURE=1; shift ;;
+    --user)
+      [ $# -ge 2 ] || die "--user needs a value"
+      FLAG_USER="$2"; SET_USER=1; shift 2 ;;
+    --name)
+      [ $# -ge 2 ] || die "--name needs a value"
+      FLAG_NAME="$2"; SET_NAME=1; shift 2 ;;
+    --email)
+      [ $# -ge 2 ] || die "--email needs a value"
+      FLAG_EMAIL="$2"; SET_EMAIL=1; shift 2 ;;
+    --editor)
+      [ $# -ge 2 ] || die "--editor needs a value"
+      FLAG_EDITOR="$2"; SET_EDITOR=1; shift 2 ;;
+    --editor-cmd)
+      [ $# -ge 2 ] || die "--editor-cmd needs a value"
+      FLAG_EDITOR_CMD="$2"; SET_EDITOR_CMD=1; shift 2 ;;
+    --git-branch)
+      [ $# -ge 2 ] || die "--git-branch needs a value"
+      FLAG_BRANCH="$2"; SET_BRANCH=1; shift 2 ;;
+    --ai)
+      [ $# -ge 2 ] || die "--ai needs a value"
+      FLAG_AI="$2"; SET_AI=1; shift 2 ;;
+    --herdr) FLAG_HERDR=yes; SET_HERDR=1; shift ;;
+    --no-herdr) FLAG_HERDR=no; SET_HERDR=1; shift ;;
+    --fastfetch) FLAG_FASTFETCH=yes; SET_FASTFETCH=1; shift ;;
+    --no-fastfetch) FLAG_FASTFETCH=no; SET_FASTFETCH=1; shift ;;
+    --zsh) FLAG_ZSH=yes; SET_ZSH=1; shift ;;
+    --no-zsh) FLAG_ZSH=no; SET_ZSH=1; shift ;;
+    -h | --help) print_help; exit 0 ;;
+    *)
+      die "unknown flag: $1 (try --help)"
+      ;;
+  esac
+done
 
 # Every nix invocation in this script opts into flakes, even when the
 # installed Nix (upstream or Determinate) has not enabled them yet.
@@ -204,6 +297,326 @@ restart_nix_daemon_if_needed() {
   fi
 }
 
+# --- per-person config -------------------------------------------------------
+ANSWERS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/wsl-nix"
+ANSWERS_FILE="$ANSWERS_DIR/user.nix"
+
+nix_q() {
+  # Escape a string for a Nix double-quoted literal.
+  printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+field_string() {
+  local key="$1" file="$2"
+  sed -n "s/^[[:space:]]*${key}[[:space:]]*=[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p" "$file" | head -n1
+}
+
+field_bool() {
+  local key="$1" file="$2" raw
+  raw="$(sed -n "s/^[[:space:]]*${key}[[:space:]]*=[[:space:]]*\\(true\\|false\\).*/\\1/p" "$file" | head -n1)"
+  if [ "$raw" = true ]; then
+    printf 'yes\n'
+  elif [ "$raw" = false ]; then
+    printf 'no\n'
+  fi
+}
+
+field_ai() {
+  local file="$1"
+  awk '
+    /^[[:space:]]*aiClis[[:space:]]*=/ { grab=1 }
+    grab { print }
+    grab && /\]/ { exit }
+  ' "$file" | sed -n 's/.*"\([^"]*\)".*/\1/p' | paste -sd, -
+}
+
+detect_full_name() {
+  local name=""
+  name="$(git config --global user.name 2>/dev/null || true)"
+  if [ -z "$name" ]; then
+    name="$(getent passwd "$USER" 2>/dev/null | cut -d: -f5 | cut -d, -f1)"
+  fi
+  printf '%s\n' "$name"
+}
+
+detect_email() {
+  git config --global user.email 2>/dev/null || true
+}
+
+detect_system() {
+  case "$(uname -m)" in
+    aarch64 | arm64) printf 'aarch64-linux\n' ;;
+    *) printf 'x86_64-linux\n' ;;
+  esac
+}
+
+load_saved_answers() {
+  HAVE_SAVED=0
+  SAVED_USER=""
+  SAVED_NAME=""
+  SAVED_EMAIL=""
+  SAVED_EDITOR=""
+  SAVED_EDITOR_CMD=""
+  SAVED_BRANCH=""
+  SAVED_AI=""
+  SAVED_HERDR=""
+  SAVED_FASTFETCH=""
+  SAVED_ZSH=""
+  SAVED_SYSTEM=""
+  local src=""
+  if [ -f "$ANSWERS_FILE" ]; then
+    src="$ANSWERS_FILE"
+  elif [ -f "$SCRIPT_DIR/user.nix" ]; then
+    src="$SCRIPT_DIR/user.nix"
+  fi
+  [ -n "$src" ] || return 0
+  if grep -q 'you@example.com' "$src"; then
+    return 0
+  fi
+  HAVE_SAVED=1
+  SAVED_USER="$(field_string username "$src")"
+  SAVED_NAME="$(field_string fullName "$src")"
+  SAVED_EMAIL="$(field_string email "$src")"
+  SAVED_EDITOR="$(field_string editor "$src")"
+  SAVED_EDITOR_CMD="$(field_string editorCommand "$src")"
+  SAVED_BRANCH="$(field_string gitDefaultBranch "$src")"
+  SAVED_AI="$(field_ai "$src")"
+  SAVED_HERDR="$(field_bool herdr "$src")"
+  SAVED_FASTFETCH="$(field_bool fastfetchOnStart "$src")"
+  SAVED_ZSH="$(field_bool zshAsLoginShell "$src")"
+  SAVED_SYSTEM="$(field_string system "$src")"
+}
+
+prompt_value() {
+  # prompt_value VAR "Question" default
+  local __var="$1" question="$2" def="$3" ans
+  if [ "$ASSUME_YES" = 1 ]; then
+    printf -v "$__var" '%s' "$def"
+    return
+  fi
+  read -r -p "$question [$def]: " ans || true
+  if [ -z "$ans" ]; then
+    printf -v "$__var" '%s' "$def"
+  else
+    printf -v "$__var" '%s' "$ans"
+  fi
+}
+
+normalize_ai() {
+  local raw="$1" item out=""
+  raw="$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]' | tr -d ' ')"
+  if [ -z "$raw" ] || [ "$raw" = all ]; then
+    printf '%s\n' "claude-code,codex,opencode"
+    return
+  fi
+  if [ "$raw" = none ]; then
+    printf '\n'
+    return
+  fi
+  IFS=',' read -r -a _ai_items <<< "$raw"
+  for item in "${_ai_items[@]}"; do
+    case "$item" in
+      claude-code | codex | opencode)
+        case ",$out," in
+          *",$item,"*) ;;
+          *) out="${out:+$out,}$item" ;;
+        esac
+        ;;
+      "") ;;
+      *) die "Unknown AI CLI: $item (use claude-code, codex, opencode, all, or none)" ;;
+    esac
+  done
+  printf '%s\n' "$out"
+}
+
+yn_to_bool() {
+  case "$1" in
+    yes | y | true | 1) printf 'true\n' ;;
+    *) printf 'false\n' ;;
+  esac
+}
+
+ai_to_nix() {
+  local raw="$1" item line="["
+  if [ -z "$raw" ]; then
+    printf '[\n  ]\n'
+    return
+  fi
+  IFS=',' read -r -a _ai_items <<< "$raw"
+  for item in "${_ai_items[@]}"; do
+    line="${line}
+    \"$(nix_q "$item")\""
+  done
+  printf '%s\n  ]\n' "$line"
+}
+
+write_user_nix() {
+  local dest="$1" ai_block
+  ai_block="$(ai_to_nix "$CFG_AI")"
+  mkdir -p "$(dirname "$dest")"
+  cat >"$dest" <<EOF
+# Generated by bootstrap.sh. Re-run ./bootstrap.sh to change these answers.
+# The copy in the repo is marked skip-worktree so it is not committed.
+{
+  username = "$(nix_q "$CFG_USER")";
+  fullName = "$(nix_q "$CFG_NAME")";
+  email = "$(nix_q "$CFG_EMAIL")";
+  system = "$(nix_q "$CFG_SYSTEM")";
+  editor = "$(nix_q "$CFG_EDITOR")"; # nvim, zed, or other
+  editorCommand = "$(nix_q "$CFG_EDITOR_CMD")"; # used when editor = "other"
+  gitDefaultBranch = "$(nix_q "$CFG_BRANCH")";
+  aiClis = ${ai_block};
+  herdr = $(yn_to_bool "$CFG_HERDR");
+  fastfetchOnStart = $(yn_to_bool "$CFG_FASTFETCH");
+  zshAsLoginShell = $(yn_to_bool "$CFG_ZSH");
+}
+EOF
+}
+
+collect_config() {
+  local detected_name detected_email def_user def_name def_email def_editor def_cmd def_branch def_ai def_herdr def_ff def_zsh
+  load_saved_answers
+  detected_name="$(detect_full_name)"
+  detected_email="$(detect_email)"
+  def_user="${SAVED_USER:-$USER}"
+  def_name="${SAVED_NAME:-${detected_name:-Your Name}}"
+  def_email="${SAVED_EMAIL:-${detected_email:-you@example.com}}"
+  def_editor="${SAVED_EDITOR:-nvim}"
+  def_cmd="${SAVED_EDITOR_CMD:-nvim}"
+  def_branch="${SAVED_BRANCH:-main}"
+  if [ "$HAVE_SAVED" = 1 ]; then
+    def_ai="${SAVED_AI:-none}"
+  else
+    def_ai="claude-code,codex,opencode"
+  fi
+  def_herdr="${SAVED_HERDR:-yes}"
+  def_ff="${SAVED_FASTFETCH:-yes}"
+  def_zsh="${SAVED_ZSH:-yes}"
+  CFG_SYSTEM="${SAVED_SYSTEM:-$(detect_system)}"
+
+  if [ "$HAVE_SAVED" = 1 ] && [ "$RECONFIGURE" = 0 ] && [ "$ASSUME_YES" = 0 ]; then
+    echo "Saved answers: $ANSWERS_FILE"
+    if confirm_no "Walk through the prompts again?"; then
+      RECONFIGURE=1
+    fi
+  fi
+
+  local ask=0
+  if [ "$HAVE_SAVED" = 0 ] || [ "$RECONFIGURE" = 1 ]; then
+    ask=1
+  fi
+
+  if [ "$SET_USER" = 1 ]; then CFG_USER="$FLAG_USER"
+  elif [ "$ask" = 1 ]; then prompt_value CFG_USER "Linux username" "$def_user"
+  else CFG_USER="$def_user"; fi
+
+  if [ "$SET_NAME" = 1 ]; then CFG_NAME="$FLAG_NAME"
+  elif [ "$ask" = 1 ]; then prompt_value CFG_NAME "Full name for git" "$def_name"
+  else CFG_NAME="$def_name"; fi
+
+  if [ "$SET_EMAIL" = 1 ]; then CFG_EMAIL="$FLAG_EMAIL"
+  elif [ "$ask" = 1 ]; then prompt_value CFG_EMAIL "Git email" "$def_email"
+  else CFG_EMAIL="$def_email"; fi
+
+  if [ "$SET_EDITOR" = 1 ]; then CFG_EDITOR="$FLAG_EDITOR"
+  elif [ "$ask" = 1 ]; then prompt_value CFG_EDITOR "Default editor (nvim, zed, or other)" "$def_editor"
+  else CFG_EDITOR="$def_editor"; fi
+  case "$CFG_EDITOR" in
+    nvim | zed | other) ;;
+    *) die "Editor must be nvim, zed, or other (got: $CFG_EDITOR)" ;;
+  esac
+
+  if [ "$CFG_EDITOR" = other ]; then
+    if [ "$SET_EDITOR_CMD" = 1 ]; then CFG_EDITOR_CMD="$FLAG_EDITOR_CMD"
+    elif [ "$ask" = 1 ]; then prompt_value CFG_EDITOR_CMD "Editor command" "$def_cmd"
+    else CFG_EDITOR_CMD="$def_cmd"; fi
+  else
+    CFG_EDITOR_CMD="${FLAG_EDITOR_CMD:-$def_cmd}"
+  fi
+
+  if [ "$SET_BRANCH" = 1 ]; then CFG_BRANCH="$FLAG_BRANCH"
+  elif [ "$ask" = 1 ]; then prompt_value CFG_BRANCH "Git default branch" "$def_branch"
+  else CFG_BRANCH="$def_branch"; fi
+
+  if [ "$SET_AI" = 1 ]; then CFG_AI="$(normalize_ai "$FLAG_AI")"
+  elif [ "$ask" = 1 ]; then
+    echo "AI CLIs: comma-separated claude-code,codex,opencode, or all, or none."
+    prompt_value CFG_AI "AI CLIs to install" "${def_ai:-all}"
+    CFG_AI="$(normalize_ai "$CFG_AI")"
+  else CFG_AI="$(normalize_ai "${def_ai:-all}")"; fi
+
+  if [ "$SET_HERDR" = 1 ]; then CFG_HERDR="$FLAG_HERDR"
+  elif [ "$ask" = 1 ]; then
+    if [ "$def_herdr" = no ]; then
+      if confirm_no "Install herdr and its plugins?"; then CFG_HERDR=yes; else CFG_HERDR=no; fi
+    else
+      if confirm "Install herdr and its plugins?"; then CFG_HERDR=yes; else CFG_HERDR=no; fi
+    fi
+  else CFG_HERDR="$def_herdr"; fi
+
+  if [ "$SET_FASTFETCH" = 1 ]; then CFG_FASTFETCH="$FLAG_FASTFETCH"
+  elif [ "$ask" = 1 ]; then
+    if [ "$def_ff" = no ]; then
+      if confirm_no "Run fastfetch when the shell starts?"; then CFG_FASTFETCH=yes; else CFG_FASTFETCH=no; fi
+    else
+      if confirm "Run fastfetch when the shell starts?"; then CFG_FASTFETCH=yes; else CFG_FASTFETCH=no; fi
+    fi
+  else CFG_FASTFETCH="$def_ff"; fi
+
+  if [ "$SET_ZSH" = 1 ]; then CFG_ZSH="$FLAG_ZSH"
+  elif [ "$ask" = 1 ]; then
+    if [ "$def_zsh" = no ]; then
+      if confirm_no "Make zsh your login shell?"; then CFG_ZSH=yes; else CFG_ZSH=no; fi
+    else
+      if confirm "Make zsh your login shell?"; then CFG_ZSH=yes; else CFG_ZSH=no; fi
+    fi
+  else CFG_ZSH="$def_zsh"; fi
+
+  case "$CFG_HERDR" in
+    yes | no) ;;
+    *) die "herdr must be yes or no" ;;
+  esac
+  case "$CFG_FASTFETCH" in
+    yes | no) ;;
+    *) die "fastfetch must be yes or no" ;;
+  esac
+  case "$CFG_ZSH" in
+    yes | no) ;;
+    *) die "zsh must be yes or no" ;;
+  esac
+
+  if [ "$CFG_USER" != "$USER" ]; then
+    warn "username is \"$CFG_USER\" but whoami is \"$USER\". home-manager will refuse to switch unless they match."
+  fi
+
+  echo
+  echo "Configuration:"
+  echo "  username:            $CFG_USER"
+  echo "  full name:           $CFG_NAME"
+  echo "  email:               $CFG_EMAIL"
+  echo "  system:              $CFG_SYSTEM"
+  echo "  editor:              $CFG_EDITOR${CFG_EDITOR:+${CFG_EDITOR_CMD:+ ($CFG_EDITOR_CMD)}}"
+  echo "  git default branch:  $CFG_BRANCH"
+  echo "  AI CLIs:             ${CFG_AI:-none}"
+  echo "  herdr + plugins:     $CFG_HERDR"
+  echo "  fastfetch on start:  $CFG_FASTFETCH"
+  echo "  zsh as login shell:  $CFG_ZSH"
+  echo
+  echo "Windows: powershell -ExecutionPolicy Bypass -File .\\windows\\setup.ps1"
+  echo "         It asks for WSL memory (default half of RAM), CPUs (default all cores), and swap (default 4GB)."
+  echo
+  confirm "Apply this configuration?" || die "Cancelled."
+}
+
+save_user_nix() {
+  write_user_nix "$ANSWERS_FILE"
+  write_user_nix "$SCRIPT_DIR/user.nix"
+  if [ -d "$SCRIPT_DIR/.git" ]; then
+    git -C "$SCRIPT_DIR" update-index --skip-worktree user.nix 2>/dev/null || true
+  fi
+  step "Wrote $ANSWERS_FILE and marked $SCRIPT_DIR/user.nix skip-worktree"
+}
+
 # Stop here when the file is sourced so tests can call the helpers above.
 if [ "${BOOTSTRAP_LIB_ONLY:-}" = 1 ]; then
   if [ "${BASH_SOURCE[0]}" != "$0" ]; then
@@ -241,6 +654,18 @@ cd "$SCRIPT_DIR"
 
 mkdir -p "$HOME/.local/share/wsl-nix"
 printf '%s\n' "$SCRIPT_DIR" > "$HOME/.local/share/wsl-nix/flake-dir"
+
+# ----------------------------------------------------------------------------
+# Per-person answers. Written before apt/Nix so --configure-only can stop here.
+# ./user.nix is tracked (Nix cannot see a gitignored file) and skip-worktree
+# so the committed copy stays the example in user.nix.example.
+# ----------------------------------------------------------------------------
+collect_config
+save_user_nix
+if [ "$CONFIGURE_ONLY" = 1 ]; then
+  echo "Configuration saved. Re-run without --configure-only to install."
+  exit 0
+fi
 
 # ----------------------------------------------------------------------------
 # 1. Minimum apt packages (everything else comes from Nix)
@@ -313,43 +738,45 @@ export NIX_CONFIG="${NIX_CONFIG:+$NIX_CONFIG$'\n'}experimental-features = nix-co
 run_nix --version
 
 # ----------------------------------------------------------------------------
-# 4. Check the user in user.nix
+# 4. The generated user.nix is already written. Nix only sees tracked files,
+#    so ./user.nix is that file (skip-worktree), not a gitignored copy.
 # ----------------------------------------------------------------------------
-FLAKE_USER="$(sed -n 's/^[[:space:]]*username[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' user.nix | head -n1)"
-if [ "$FLAKE_USER" != "$USER" ]; then
-  warn "user.nix has username = \"$FLAKE_USER\", but you are \"$USER\"."
-  if confirm "Change user.nix to \"$USER\" automatically?"; then
-    sed -i "s/^\([[:space:]]*username[[:space:]]*=[[:space:]]*\)\"[^\"]*\"/\1\"$USER\"/" user.nix
-  else
-    die "Edit user.nix and run this script again."
-  fi
-fi
-if grep -q 'you@example.com' user.nix; then
-  warn "user.nix still has the example email. Edit it later and run: hms"
+if [ "$CFG_USER" != "$USER" ]; then
+  die "Refusing to switch: user.nix username is \"$CFG_USER\" but this login is \"$USER\"."
 fi
 
-# Flakes only see files tracked by git
+# Flakes only see files tracked by git. user.nix is tracked so this eval
+# can read it, and skip-worktree keeps the generated answers out of the commit.
 if [ ! -d .git ]; then
   git init -q -b main
+  git add -A
+  git update-index --skip-worktree user.nix 2>/dev/null || true
+else
+  git update-index --skip-worktree user.nix 2>/dev/null || true
+  git add -A
 fi
-git add -A
 
 # ----------------------------------------------------------------------------
 # 5. home-manager switch (installs EVERYTHING: zsh, nvim, herdr, AIs, node, python...)
 # ----------------------------------------------------------------------------
 step "Applying the home-manager configuration (the first run takes a while)"
-run_nix run .#home-manager -- switch --flake ".#$USER" -b hm-backup
+export WSL_NIX_USER_FILE="$ANSWERS_FILE"
+run_nix run .#home-manager -- switch --flake ".#$CFG_USER" -b hm-backup
 
 # ----------------------------------------------------------------------------
 # 6. zsh as the default shell (uses apt's zsh: /usr/bin/zsh; the config comes from home-manager)
 # ----------------------------------------------------------------------------
-ZSH_BIN="$(command -v zsh || true)"
-[ -x /usr/bin/zsh ] && ZSH_BIN=/usr/bin/zsh
-CURRENT_SHELL="$(getent passwd "$USER" | cut -d: -f7)"
-if [ -n "$ZSH_BIN" ] && [ "$CURRENT_SHELL" != "$ZSH_BIN" ]; then
-  step "Changing your default shell to $ZSH_BIN"
-  grep -qx "$ZSH_BIN" /etc/shells || echo "$ZSH_BIN" | sudo tee -a /etc/shells >/dev/null
-  sudo chsh -s "$ZSH_BIN" "$USER"
+if [ "$CFG_ZSH" = yes ]; then
+  ZSH_BIN="$(command -v zsh || true)"
+  [ -x /usr/bin/zsh ] && ZSH_BIN=/usr/bin/zsh
+  CURRENT_SHELL="$(getent passwd "$USER" | cut -d: -f7)"
+  if [ -n "$ZSH_BIN" ] && [ "$CURRENT_SHELL" != "$ZSH_BIN" ]; then
+    step "Changing your default shell to $ZSH_BIN"
+    grep -qx "$ZSH_BIN" /etc/shells || echo "$ZSH_BIN" | sudo tee -a /etc/shells >/dev/null
+    sudo chsh -s "$ZSH_BIN" "$USER"
+  fi
+else
+  step "Leaving the login shell unchanged"
 fi
 
 # ----------------------------------------------------------------------------
@@ -363,18 +790,24 @@ fi
 # ----------------------------------------------------------------------------
 cat <<MSG
 
-${c_green}✔ Done!${c_reset}  Close and reopen the terminal (or run: exec zsh -l)
+${c_green}Done.${c_reset}  Close and reopen the terminal (or run: exec zsh -l)
 
 Next steps:
-  1. Check ${SCRIPT_DIR}/user.nix (git user/name/email) and run:  hms
+  1. Change answers any time with:  ./bootstrap.sh --reconfigure
   2. GitHub:        gh auth login
-  3. Claude Code:   claude          (login opens in the Windows browser)
-  4. Codex:         codex login
-  5. opencode:      opencode auth login
-  6. herdr:         herdr           (ctrl+b q detaches, 'herdr' reattaches)
-  7. New project:   cp -r ${SCRIPT_DIR}/templates/node ~/code/my-app   (includes .envrc)
-                    cd ~/code/my-app && direnv allow
-  8. Zed (Windows): Ctrl+Shift+P -> "projects: open wsl" -> choose Ubuntu-26.04
+$(if [ -n "$CFG_AI" ]; then cat <<AIS
+
+  AI CLIs selected: ${CFG_AI}
+    claude-code -> claude     (login opens in the Windows browser)
+    codex       -> codex login
+    opencode    -> opencode auth login
+AIS
+fi)
+$(if [ "$CFG_HERDR" = yes ]; then echo "  herdr:        herdr    (ctrl+b q detaches, herdr again reattaches)"; fi)
+  New project:  cp -r ${SCRIPT_DIR}/templates/node ~/code/my-app && cd ~/code/my-app && direnv allow
+  Zed (Windows): Ctrl+Shift+P -> "projects: open wsl" -> choose Ubuntu-26.04
+  Windows VM size: powershell -ExecutionPolicy Bypass -File .\\windows\\setup.ps1
+    It asks for memory (default half of RAM), CPUs (default all cores), and swap (default 4GB).
 
 Update everything:  hmu        Roll back:  home-manager generations  (see the README)
 MSG

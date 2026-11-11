@@ -7,12 +7,12 @@
 # ============================================================================
 
 [wsl2]
-# Max RAM for the WSL VM. Default = 50% of Windows RAM.
-# Practical rule: half of RAM (16 GB -> 8GB, 32 GB -> 16GB). ADJUST FOR YOUR PC.
+# Max RAM for the WSL VM. setup.ps1 replaces this with half of the machine RAM.
+# The 8GB below is only the fallback if you copy this file by hand.
 memory=8GB
 
-# Logical cores WSL may use. Default = all of them. Leave some free for Windows.
-# ADJUST: e.g. 12 threads -> 8.
+# Logical cores WSL may use. setup.ps1 replaces this with all logical processors.
+# The 8 below is only the fallback if you copy this file by hand.
 processors=8
 
 # Swap file on disk. 0 disables it. 4GB avoids OOM during heavy Nix builds.
