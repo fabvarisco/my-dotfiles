@@ -1,9 +1,9 @@
 # ============================================================================
-#  home.nix — tudo que é "seu" no WSL: pacotes, shell, git, editores, IAs.
-#  Depois de editar:  hms
-#  (atalho de `home-manager switch --flake <pasta do clone>`).
-#  A pasta NÃO é fixa: o bootstrap.sh grava o caminho em
-#  ~/.local/share/wsl-nix/flake-dir e o zsh lê esse arquivo.
+#  home.nix — everything that is "yours" in WSL: packages, shell, git, editors, AIs.
+#  After editing:  hms
+#  (shortcut for `home-manager switch --flake <clone folder>`).
+#  The folder is NOT fixed: bootstrap.sh records the path in
+#  ~/.local/share/wsl-nix/flake-dir and zsh reads that file.
 # ============================================================================
 {
   config,
@@ -20,20 +20,20 @@ in
   home.username = user.username;
   home.homeDirectory = "/home/${user.username}";
 
-  # Versão do formato de estado do home-manager. NÃO mude depois do 1º switch
-  # (não tem nada a ver com a versão dos pacotes).
+  # Home Manager state-format version. Do not change it after the first switch
+  # (it has nothing to do with package versions).
   home.stateVersion = "26.05";
 
-  # Ubuntu não é NixOS: isso ajusta XDG_DATA_DIRS, locale etc.
+  # Ubuntu is not NixOS: this adjusts XDG_DATA_DIRS, locale, and so on.
   targets.genericLinux.enable = true;
-  # Sem GPU no WSL (não precisamos de drivers OpenGL/CUDA pros pacotes Nix).
+  # No GPU in WSL (Nix packages here do not need OpenGL/CUDA drivers).
   targets.genericLinux.gpu.enable = false;
 
   # --------------------------------------------------------------------------
-  # Pacotes
+  # Packages
   # --------------------------------------------------------------------------
   home.packages = (with pkgs; [
-    # --- CLI do dia a dia ---
+    # --- Everyday CLI ---
     ripgrep
     fd
     jq
@@ -43,42 +43,42 @@ in
     zip
     tree
     htop
-    wsl-open # abre links/arquivos no navegador/app padrão do Windows (login das IAs)
+    wsl-open # open links/files in Windows' default browser/app (AI logins)
 
-    # --- Multiplexer dos agentes (OBRIGATÓRIO) ---
+    # --- Agent multiplexer (REQUIRED) ---
     # herdr: "the runtime your coding agents live on" — https://github.com/herdrdev/herdr
-    # Empacotado no nixpkgs (pkgs/by-name/he/herdr).
+    # Packaged in nixpkgs (pkgs/by-name/he/herdr).
     herdr
 
-    # --- IAs de código (todas do nixpkgs-unstable) ---
+    # --- Coding AIs (all from nixpkgs-unstable) ---
     claude-code # comando: claude   (unfree -> allowUnfree no flake.nix)
     codex # comando: codex    (OpenAI Codex CLI)
     opencode # comando: opencode
 
-    # --- Linguagens globais (fallback; por projeto use devenv) ---
+    # --- Global languages (fallback; use devenv per project) ---
     nodejs_26 # Node 26 = LTS ativa ("Lithium") desde out/2026
     python3
-    uv # gerenciador Python rápido (venv, pip, python versions)
+    uv # fast Python manager (venv, pip, python versions)
 
-    # --- Editores ---
-    neovim # nvim / vi / vim (aliases abaixo)
+    # --- Editors ---
+    neovim # nvim / vi / vim (aliases below)
 
-    # --- Ambientes por projeto ---
+    # --- Per-project environments ---
     devenv
 
-    # --- Nix: formatter + LSP (útil no Zed/Neovim pra editar este repo) ---
+    # --- Nix: formatter + LSP (useful in Zed/Neovim while editing this repo) ---
     nixfmt
     nil
 
-    # --- Zed DENTRO do WSL (via WSLg) — desligado de propósito.
-    # Recomendado: Zed nativo do Windows + "Open WSL" (ver README).
-    # Descomente se quiser rodar o Zed Linux por WSLg:
+    # --- Zed INSIDE WSL (via WSLg) — left off on purpose.
+    # Recommended: native Windows Zed + "Open WSL" (see the README).
+    # Uncomment if you want to run Linux Zed through WSLg:
     # zed-editor
 
-    # fastfetch entra por programs.fastfetch (não duplicar aqui).
-    # starship entra por programs.starship.
+    # fastfetch comes from programs.fastfetch (do not list it again here).
+    # starship comes from programs.starship.
   ]) ++ [
-    # Binários dos plugins (o herdr em si chama a cópia dentro do plugin root).
+    # Plugin binaries (herdr itself calls the copy inside the plugin root).
     (pkgs.writeShellScriptBin "herdr-gitview" ''
       export PATH="$HOME/.nix-profile/bin:$PATH"
       exec ${herdrPlugins.herdr-gitview}/bin/herdr-gitview "$@"
@@ -91,7 +91,7 @@ in
   home.sessionVariables = {
     EDITOR = "nvim";
     VISUAL = "nvim";
-    BROWSER = "wsl-open"; # claude/codex/opencode/gh abrem o login no navegador do Windows
+    BROWSER = "wsl-open"; # claude/codex/opencode/gh open login in the Windows browser
   };
 
   home.sessionPath = [
@@ -100,12 +100,12 @@ in
 
   # --------------------------------------------------------------------------
   # Shell: zsh + starship + fastfetch
-  # Starship e fastfetch vieram do branch fedora/sway.
-  # Starship é gerenciado SÓ por programs.starship (não há xdg.configFile
-  # nem eval manual no zsh — isso duplicaria o prompt).
-  # fastfetch: o pacote vem do módulo; os arquivos (config, ASCII, script)
-  # vêm de xdg.configFile. programs.fastfetch.settings fica vazio de
-  # propósito, senão o módulo também gera config.jsonc e briga com a pasta.
+  # Starship and fastfetch came from the fedora/sway branch.
+  # Starship is managed ONLY by programs.starship (there is no xdg.configFile
+  # and no manual eval in zsh — that would duplicate the prompt).
+  # fastfetch: the package comes from the module; the files (config, ASCII, script)
+  # come from xdg.configFile. programs.fastfetch.settings stays empty on
+  # purpose, otherwise the module also generates config.jsonc and fights the directory.
   # --------------------------------------------------------------------------
   programs.zsh = {
     enable = true;
@@ -119,8 +119,8 @@ in
       share = true;
     };
 
-    # Garante o Nix no PATH mesmo se /etc/zsh/zshenv não carregar o profile.
-    # HM_FLAKE_DIR segue a pasta em que o bootstrap.sh rodou.
+    # Put Nix on PATH even if /etc/zsh/zshenv does not load the profile.
+    # HM_FLAKE_DIR follows the folder bootstrap.sh ran in.
     envExtra = ''
       if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ] && [ -z "$__ETC_PROFILE_NIX_SOURCED" ]; then
         . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
@@ -131,8 +131,8 @@ in
       fi
     '';
 
-    # hms/hmu são funções (a pasta do flake não é fixa). O fastfetch roda
-    # no fim do zshrc, como o bash do Fedora rodava random-logo.sh.
+    # hms/hmu are functions (the flake folder is not fixed). fastfetch runs
+    # at the end of zshrc, the way Fedora's bash ran random-logo.sh.
     initContent = lib.mkMerge [
       (lib.mkOrder 1000 ''
         hm-flake-dir() {
@@ -169,12 +169,12 @@ in
       ll = "eza -lah --git --group-directories-first";
       lt = "eza --tree --level=2";
       g = "git";
-      # `lg` fica com a função do programs.lazygit (cd ao sair). Um alias
-      # com o mesmo nome esconderia essa função.
+      # `lg` stays the programs.lazygit function (cd on exit). An alias
+      # with the same name would hide that function.
       v = "nvim";
       vi = "nvim";
       vim = "nvim";
-      # Abrir a pasta atual no Explorer do Windows
+      # Open the current folder in Windows Explorer
       explorer = "explorer.exe .";
     };
   };
@@ -182,7 +182,7 @@ in
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
-    # settings do starship.toml (fedora/sway), mais o nix_shell deste setup.
+    # settings from starship.toml (fedora/sway), plus this setup's nix_shell.
     settings = lib.recursiveUpdate (builtins.fromTOML (builtins.readFile ./starship.toml)) {
       nix_shell.format = "via [❄️ $state( \\($name\\))]($style) ";
     };
@@ -195,7 +195,7 @@ in
     recursive = true;
   };
 
-  # direnv + nix-direnv: entra na pasta do projeto -> devenv carrega sozinho
+  # direnv + nix-direnv: enter the project folder -> devenv loads on its own
   programs.direnv = {
     enable = true;
     enableZshIntegration = true;
@@ -213,7 +213,7 @@ in
   };
 
   programs.zoxide = {
-    enable = true; # `z pasta` pula pra pastas usadas recentemente
+    enable = true; # `z folder` jumps to recently used directories
     enableZshIntegration = true;
   };
 
@@ -236,7 +236,7 @@ in
       init.defaultBranch = "main";
       pull.rebase = true;
       push.autoSetupRemote = true;
-      core.autocrlf = "input"; # evita o inferno de CRLF vindo do Windows
+      core.autocrlf = "input"; # avoid the CRLF mess coming from Windows
       rerere.enabled = true;
     };
     ignores = [
@@ -254,24 +254,24 @@ in
   programs.gh = {
     enable = true;
     settings.git_protocol = "https";
-    gitCredentialHelper.enable = true; # `gh auth login` vira o credential helper do git
+    gitCredentialHelper.enable = true; # `gh auth login` becomes git's credential helper
   };
 
   programs.lazygit.enable = true;
 
   # --------------------------------------------------------------------------
-  # Neovim — o binário vem de home.packages (lá em cima). De propósito NÃO uso
-  # `programs.neovim`: ele cria ~/.config/nvim/init.lua read-only e isso briga
-  # com LazyVim/config própria. Assim ~/.config/nvim continua 100% seu.
-  #   - quer LazyVim? rode `lazyvim-init` (script abaixo) uma vez.
-  # O branch fedora/sway não tinha config de Neovim para trazer.
+  # Neovim — the binary comes from home.packages (above). On purpose I do not use
+  # `programs.neovim`: it creates a read-only ~/.config/nvim/init.lua and that fights
+  # LazyVim or your own config. So ~/.config/nvim stays entirely yours.
+  #   - want LazyVim? run `lazyvim-init` (script below) once.
+  # The fedora/sway branch had no Neovim config to bring over.
   # --------------------------------------------------------------------------
-  # Bootstrap opcional do LazyVim (não sobrescreve config existente).
+  # Optional LazyVim bootstrap (does not overwrite an existing config).
   home.file.".local/bin/lazyvim-init" = {
     executable = true;
     text = ''
       #!/usr/bin/env bash
-      # Instala o LazyVim starter em ~/.config/nvim (precisa de gcc/make: o bootstrap já instala)
+      # Install the LazyVim starter in ~/.config/nvim (needs gcc/make: bootstrap already installs them)
       set -euo pipefail
       cfg="''${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
       if [ -e "$cfg" ]; then
@@ -285,16 +285,16 @@ in
   };
 
   # --------------------------------------------------------------------------
-  # herdr: plugins TUI (gitview + nvim). herdr-chat fica de fora (app macOS).
-  # plugins.json é o registro que o herdr 0.9.5 lê. As chaves prefix+ abaixo
-  # não batem com os defaults do herdr (prefix+e é o scrollback, prefix+o
-  # abre a notificação, prefix+v divide o pane, cmd+… não existe no WSL).
-  # ~/.config/nvim continua sem ser gerenciado.
+  # herdr: TUI plugins (gitview + nvim). herdr-chat stays out (macOS app).
+  # plugins.json is the registry herdr 0.9.5 reads. The prefix+ keys below
+  # do not collide with herdr's defaults (prefix+e is scrollback, prefix+o
+  # opens the notification, prefix+v splits the pane, cmd+… does not exist on WSL).
+  # ~/.config/nvim stays unmanaged.
   # --------------------------------------------------------------------------
   xdg.configFile."herdr/plugins.json".source = "${herdrPlugins.registry}/plugins.json";
 
   xdg.configFile."herdr/config.toml".text = ''
-    # Atalhos dos plugins. O resto fica no default compilado do herdr.
+    # Plugin shortcuts. Everything else stays herdr's compiled default.
     [[keys.command]]
     key = "prefix+u"
     type = "plugin_action"
@@ -320,18 +320,18 @@ in
     description = "abrir arquivo que o agente tocou"
   '';
 
-  # Enter no diff abre o nvim do Nix, sem cair no xdg-open (não há compositor).
+  # Enter on a diff opens Nix's nvim, instead of falling through to xdg-open (no compositor).
   xdg.configFile."herdr/plugins/config/chmarax.gitview/config.toml".text = ''
     editor = ["${pkgs.neovim}/bin/nvim"]
   '';
 
-  # O binário do herdr-nvim procura `nvim` no PATH do servidor. Caminho absoluto
-  # do Neovim do home-manager, para a sidebar achar o editor mesmo com PATH curto.
+  # The herdr-nvim binary looks up `nvim` on the server's PATH. Absolute path
+  # of home-manager's Neovim, so the sidebar finds the editor even with a short PATH.
   xdg.configFile."herdr-nvim/config.toml".text = ''
     [sidebar]
     nvim_bin = "${pkgs.neovim}/bin/nvim"
   '';
 
-  # O próprio home-manager (comando `home-manager`)
+  # home-manager itself (the `home-manager` command)
   programs.home-manager.enable = true;
 }

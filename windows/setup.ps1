@@ -1,15 +1,15 @@
 ﻿<#
-  setup.ps1 — prepara o Windows pro WSL (rode no PowerShell, de dentro da pasta do repo):
+  setup.ps1 — prepare Windows for WSL (run in PowerShell, from the repo folder):
 
      powershell -ExecutionPolicy Bypass -File .\windows\setup.ps1
 
-  O que faz:
-    1. Atualiza o WSL (wsl --update)
-    2. Copia windows\.wslconfig para %USERPROFILE%\.wslconfig (faz backup se já existir)
-    3. Instala o Ubuntu 26.04 LTS (nome oficial: Ubuntu-26.04)
-    4. (Opcional) instala o Zed for Windows via winget
-  Se o WSL nunca foi instalado nesta máquina, o Windows pode pedir REINICIAR.
-  Depois de reiniciar, rode este script de novo.
+  What it does:
+    1. Updates WSL (wsl --update)
+    2. Copies windows\.wslconfig to %USERPROFILE%\.wslconfig (backs up the old file if it exists)
+    3. Installs Ubuntu 26.04 LTS (official name: Ubuntu-26.04)
+    4. (Optional) installs Zed for Windows via winget
+  If WSL was never installed on this machine, Windows may ask you to REBOOT.
+  After the reboot, run this script again.
 #>
 [CmdletBinding()]
 param(
@@ -32,7 +32,7 @@ if (Test-Path $dst) {
 Copy-Item $src $dst -Force
 Write-Host "    -> $dst  (ajuste memory/processors pro seu PC!)" -ForegroundColor Yellow
 
-# Aplica a config nova antes de criar a distro (sparseVhd só vale p/ VHD novo)
+# Apply the new config before creating the distro (sparseVhd only applies to a new VHD)
 wsl --shutdown
 
 Write-Host "==> Distros instaladas:" -ForegroundColor Green
@@ -44,7 +44,7 @@ if ($installed -contains $Distro) {
 } else {
   Write-Host "==> Instalando $Distro (vai pedir usuário e senha do Linux)" -ForegroundColor Green
   Write-Host "    Dica: use o MESMO usuário que está em user.nix (padrão: hitsu)."
-  # Confira os nomes disponíveis com: wsl --list --online
+  # See the available names with: wsl --list --online
   wsl --install -d $Distro
 }
 

@@ -1,110 +1,109 @@
 # wsl/ubuntu-nix 🐧❄️
 
-Ambiente de dev **reprodutível** no Windows: se o WSL quebrar, você apaga e recria
-tudo igualzinho em ~15 minutos.
+A **reproducible** dev environment on Windows: if WSL breaks, delete it and recreate the same setup in about 15 minutes.
 
-Branch de longa duração do repositório [my-dotfiles](https://github.com/fabvarisco/my-dotfiles), ao lado de `nixos/hyprland`, `fedora/sway` e `windows/glazewm-yasb`. Este branch **não é para merge** — ele vive sozinho, como os outros.
+Long-lived branch of [my-dotfiles](https://github.com/fabvarisco/my-dotfiles), next to `nixos/hyprland`, `fedora/sway`, and `windows/glazewm-yasb`. This branch is **not for merging**. It lives on its own, like the others.
 
-**Stack:** Ubuntu 26.04 LTS (WSL2) + Nix (instalador Determinate) + home-manager (flake) + devenv por projeto.
+**Stack:** Ubuntu 26.04 LTS (WSL2) + Nix (Determinate installer) + home-manager (flake) + devenv per project.
 
-| O quê | Como vem |
+| What | How it arrives |
 |---|---|
 | Shell | zsh + starship + autosuggestions + syntax highlighting + fzf + zoxide |
 | CLI | ripgrep, fd, bat, eza, jq, curl, wget, unzip, zip, tree, htop, git, gh, lazygit |
-| Editores | **Neovim** (Nix) · **Zed** (app do Windows conectado no WSL) |
-| **herdr** | multiplexer de terminal para agentes de IA (nixpkgs) |
-| IAs | `claude` (Claude Code), `codex` (OpenAI Codex CLI), `opencode` (todos do nixpkgs) |
-| Linguagens globais | Node 26 (LTS), Python 3, uv (fallback; por projeto use devenv) |
-| Por projeto | devenv + direnv + nix-direnv (`templates/node`, `templates/python`) |
-| Sem | Docker, GPU/CUDA, compositor (Sway/Wayland) |
+| Editors | **Neovim** (Nix) · **Zed** (Windows app connected to WSL) |
+| **herdr** | terminal multiplexer for AI coding agents (nixpkgs) |
+| AIs | `claude` (Claude Code), `codex` (OpenAI Codex CLI), `opencode` (all from nixpkgs) |
+| Global languages | Node 26 (LTS), Python 3, uv (fallback; use devenv per project) |
+| Per project | devenv + direnv + nix-direnv (`templates/node`, `templates/python`) |
+| Without | Docker, GPU/CUDA, a compositor (Sway/Wayland) |
 
 ```
 .
-├── flake.nix          # entradas (nixpkgs-unstable + home-manager), travadas no flake.lock
-├── flake.lock         # versões EXATAS de tudo (commite sempre!)
-├── user.nix           # >>> EDITE: usuário, nome, e-mail <<<
-├── home.nix           # pacotes, shell, git, aliases
-├── herdr-plugins.nix  # herdr-gitview e herdr-nvim pinados (herdr-chat não entra)
-├── starship.toml      # prompt vindo do fedora/sway (rótulo @wsl)
-├── fastfetch/         # config, ASCII arts e random-logo.sh (também do fedora/sway)
-├── bootstrap.sh       # roda dentro do Ubuntu novo; usa a própria pasta
+├── flake.nix          # inputs (nixpkgs-unstable + home-manager), pinned in flake.lock
+├── flake.lock         # EXACT versions of everything (always commit it!)
+├── user.nix           # >>> EDIT: user, name, email <<<
+├── home.nix           # packages, shell, git, aliases
+├── herdr-plugins.nix  # pinned herdr-gitview and herdr-nvim (herdr-chat is not included)
+├── starship.toml      # prompt from fedora/sway (label @wsl)
+├── fastfetch/         # config, ASCII art, and random-logo.sh (also from fedora/sway)
+├── bootstrap.sh       # run inside the new Ubuntu; uses its own directory
 ├── windows/
-│   ├── .wslconfig     # limites de RAM/CPU, rede mirrored, VHD sparse
-│   └── setup.ps1      # instala WSL/Ubuntu-26.04, copia .wslconfig, instala Zed
+│   ├── .wslconfig     # RAM/CPU limits, mirrored networking, sparse VHD
+│   └── setup.ps1      # install WSL/Ubuntu-26.04, copy .wslconfig, install Zed
 └── templates/
     ├── node/          # devenv.nix + devenv.yaml + .envrc + .gitignore
-    └── python/        # idem, com uv
+    └── python/        # same, with uv
 ```
 
-## O que veio do `fedora/sway`
+## What came from `fedora/sway`
 
-O prompt e o fastfetch deste branch são os do Fedora. O home-manager aplica cada um **uma vez** (sem `~/.bashrc.d` paralelo e sem um segundo `starship.toml`):
+The prompt and fastfetch on this branch are the Fedora ones. Home-manager applies each **once** (no parallel `~/.bashrc.d`, and no second `starship.toml`):
 
-| Peça | Como entrou aqui |
+| Piece | How it landed here |
 |---|---|
-| **Starship** | `starship.toml` (paleta `lock_dusk`, prompt numa linha) vira `programs.starship.settings`, com integração só no zsh. O rótulo do usuário passou de `@fedora` para `@wsl`. O formato `nix_shell` deste setup WSL continua, para aparecer dentro de `nix shell` / devenv. |
-| **fastfetch** | `fastfetch/config.jsonc`, os três ASCII arts e o `random-logo.sh`. O pacote vem de `programs.fastfetch`; os arquivos, de `xdg.configFile` (o módulo não gera outro `config.jsonc`). No Fedora o script rodava no início do bash; aqui roda no fim do zsh interativo. A logo embutida sorteada junto com os ASCII arts passou de `fedora` para `ubuntu`. |
+| **Starship** | `starship.toml` (palette `lock_dusk`, one-line prompt) becomes `programs.starship.settings`, integrated with zsh only. The username label changed from `@fedora` to `@wsl`. The `nix_shell` format from this WSL setup stays, so it shows up inside `nix shell` / devenv. |
+| **fastfetch** | `fastfetch/config.jsonc`, the three ASCII arts, and `random-logo.sh`. The package comes from `programs.fastfetch`; the files come from `xdg.configFile` (the module does not generate a second `config.jsonc`). On Fedora the script ran at the start of bash; here it runs at the end of interactive zsh. The built-in logo drawn alongside the ASCII arts changed from `fedora` to `ubuntu`. |
 
-O branch Fedora **não tinha** aliases, `gitconfig` nem config de Neovim para trazer. Git (`programs.git`), aliases (`ls`/`ll`/`g`/`v`…) e o Neovim sem `init.lua` gerenciado já são deste setup WSL.
+The Fedora branch had no aliases, gitconfig, or Neovim config to bring over. Git (`programs.git`), the aliases (`ls`/`ll`/`g`/`v`…), and Neovim without a managed `init.lua` already belong to this WSL setup.
 
-Ficou de fora tudo que é desktop/Wayland, porque o WSL desta branch não tem compositor: Sway, SwayFX, swaylock, Noctalia, Vicinae, Kitty, GTK, papéis de parede, `nwg-displays`, `pointer-accel` e a sessão em `system/`. Não havia waybar, wofi nem mako nesse branch (a barra do Fedora é a Noctalia).
+Everything desktop/Wayland stayed behind, because this WSL branch has no compositor: Sway, SwayFX, swaylock, Noctalia, Vicinae, Kitty, GTK, wallpapers, `nwg-displays`, `pointer-accel`, and the session in `system/`. That branch had no waybar, wofi, or mako (Fedora's bar is Noctalia).
 
-## Plugins do herdr
+## herdr plugins
 
-O `herdr` do nixpkgs é o TUI 0.9.5. Nixpkgs não tem pacote `herdr-gitview`, `herdr-nvim` nem `herdr-chat`. Os dois que funcionam neste WSL (terminal, sem Wayland) estão em `herdr-plugins.nix`: fonte no commit do release e binário Linux que o `herdr/install.sh` deles baixa. O home-manager registra os dois em `~/.config/herdr/plugins.json` (`herdr plugin link`) e liga as teclas em `~/.config/herdr/config.toml`. O prefixo do herdr continua `ctrl+b`.
+The nixpkgs `herdr` package is the 0.9.5 TUI. Nixpkgs has no `herdr-gitview`, `herdr-nvim`, or `herdr-chat` package. The two that work on this WSL (a terminal, no Wayland) live in `herdr-plugins.nix`: source at the release commit, plus the Linux binary their `herdr/install.sh` downloads. Home-manager registers both in `~/.config/herdr/plugins.json` (`herdr plugin link`) and binds the keys in `~/.config/herdr/config.toml`. Herdr's prefix stays `ctrl+b`.
 
-| Tecla | Ação |
+| Keys | Action |
 |---|---|
-| `ctrl+b` depois `u` | gitview na aba atual |
-| `ctrl+b` depois `d` | gitview numa aba só dele |
-| `ctrl+b` depois `a` | sidebar do nvim |
-| `ctrl+b` depois `f` | arquivo que o agente tocou |
+| `ctrl+b` then `u` | gitview in the current tab |
+| `ctrl+b` then `d` | gitview in its own tab |
+| `ctrl+b` then `a` | nvim sidebar |
+| `ctrl+b` then `f` | file the agent touched |
 
-`~/.config/nvim` segue sem ser gerenciado. A sidebar do herdr-nvim injeta o Lua do plugin sozinha. No nvim do dia a dia, as anotações pedem uma linha no seu plugin manager, quando você quiser: `{ "ChmaraX/herdr-nvim", opts = {} }`.
+`~/.config/nvim` stays unmanaged. The herdr-nvim sidebar injects the plugin's Lua by itself. In day-to-day nvim, annotations need one line in your plugin manager when you want them: `{ "ChmaraX/herdr-nvim", opts = {} }`.
 
-**herdr-chat não é instalado.** O repositório que acompanha os outros dois, [ChmaraX/herdr-chat](https://github.com/ChmaraX/herdr-chat), é mod do app desktop Herdr (`herdr-app` / `hc`), só macOS: o instalador procura o app em `/Applications` e a área de transferência de imagem usa `osascript`. Não tem `herdr-plugin.toml` e não roda no TUI headless.
+**herdr-chat is not installed.** The repository that pairs with the other two, [ChmaraX/herdr-chat](https://github.com/ChmaraX/herdr-chat), is a mod for the Herdr desktop app (`herdr-app` / `hc`), macOS only: the installer looks for the app in `/Applications`, and image clipboard uses `osascript`. It has no `herdr-plugin.toml` and does not run in the headless TUI.
 
 ---
 
-## 0. Antes de tudo: edite `user.nix`
+## 0. Before anything else: edit `user.nix`
 
 ```nix
-username = "hitsu";               # = usuário Linux que você vai criar no Ubuntu
+username = "hitsu";               # = the Linux user you will create in Ubuntu
 fullName = "Fabricio Varisco";
 email    = "fabricio.varisco@outlook.com";
 ```
 
-(Se o `username` não bater com o seu usuário, o `bootstrap.sh` oferece corrigir sozinho.)
+(If `username` does not match your user, `bootstrap.sh` offers to fix it.)
 
-Suba este repo pro **seu GitHub** (privado tá ótimo). Ele é o seu backup de verdade.
+Push this repo to **your GitHub** (private is fine). That repository is the real backup.
 
 ---
 
-## 1. Do Windows zerado até o terminal pronto
+## 1. From a blank Windows install to a ready terminal
 
-### 1.1 No Windows (PowerShell)
+### 1.1 On Windows (PowerShell)
 
 ```powershell
-# na pasta do repo (baixado/clonado no Windows)
+# in the repo folder (downloaded/cloned on Windows)
 powershell -ExecutionPolicy Bypass -File .\windows\setup.ps1
 ```
 
-Ele faz: `wsl --update` → copia `windows\.wslconfig` para `%USERPROFILE%\.wslconfig`
-(com backup do antigo) → `wsl --install -d Ubuntu-26.04` → `winget install ZedIndustries.Zed`.
+It does: `wsl --update` → copies `windows\.wslconfig` to `%USERPROFILE%\.wslconfig`
+(backing up the old one) → `wsl --install -d Ubuntu-26.04` → `winget install ZedIndustries.Zed`.
 
-> ⚠️ **Ajuste `memory` e `processors` no `.wslconfig`** pro seu PC (padrão do arquivo: 8GB / 8 núcleos).
-> Se for a 1ª vez com WSL, o Windows pode pedir reinício; depois rode o script de novo.
+> ⚠️ **Adjust `memory` and `processors` in `.wslconfig`** for your PC (the file's default is 8GB / 8 cores).
+> The first time you install WSL, Windows may ask for a reboot; run the script again afterwards.
 
-Quer fazer na mão?
+Prefer to do it by hand?
 
 ```powershell
-wsl --install -d Ubuntu-26.04     # nomes disponíveis: wsl --list --online
+wsl --install -d Ubuntu-26.04     # available names: wsl --list --online
 copy windows\.wslconfig $env:USERPROFILE\.wslconfig
 ```
 
-Na 1ª abertura do Ubuntu ele pede **usuário e senha** → use o mesmo `username` do `user.nix`.
+The first time Ubuntu opens it asks for a **username and password** → use the same `username` as `user.nix`.
 
-### 1.2 Dentro do Ubuntu
+### 1.2 Inside Ubuntu
 
 ```bash
 git clone -b wsl/ubuntu-nix https://github.com/fabvarisco/my-dotfiles
@@ -112,96 +111,94 @@ cd my-dotfiles
 ./bootstrap.sh
 ```
 
-A pasta pode ter outro nome (`git clone -b wsl/ubuntu-nix https://github.com/fabvarisco/my-dotfiles meu-wsl` e `cd meu-wsl`). O `bootstrap.sh` usa o diretório do próprio script — não procura `~/hitsu-wsl-setup`. Ele grava esse caminho em `~/.local/share/wsl-nix/flake-dir`, e os atalhos `hms` / `hmu` leem o arquivo.
+The folder can have another name (`git clone -b wsl/ubuntu-nix https://github.com/fabvarisco/my-dotfiles my-wsl` and `cd my-wsl`). `bootstrap.sh` uses the script's own directory. It does not look for `~/hitsu-wsl-setup`. It records that path in `~/.local/share/wsl-nix/flake-dir`, and the `hms` / `hmu` shortcuts read the file.
 
-Se o clone estiver em `/mnt/c/...` (disco do Windows), o script copia para `~/<nome-da-pasta>` e continua de lá. Projetos e este repo ficam no disco do Linux.
+If the clone is under `/mnt/c/...` (the Windows disk), the script copies it to `~/<folder-name>` and continues from there. Projects and this repo stay on the Linux disk.
 
-O `bootstrap.sh`:
-1. `apt` só com o mínimo (curl, git, xz, zsh, build-essential, locales)
-2. confere se o systemd está ligado (Ubuntu no WSL já vem com ele)
-3. instala o Nix pelo instalador da Determinate Systems (flakes já ligados)
-4. coloca seu usuário em `trusted-users` (pro cache binário do devenv funcionar)
-5. `home-manager switch` → instala TUDO da tabela lá em cima
-6. troca seu shell para zsh
-7. mostra os próximos passos
+`bootstrap.sh`:
+1. `apt` with only the minimum (curl, git, xz, zsh, build-essential, locales)
+2. checks that systemd is on (Ubuntu on WSL already ships with it)
+3. installs Nix with the Determinate Systems installer (flakes already enabled)
+4. adds your user to `trusted-users` (so devenv's binary cache works)
+5. `home-manager switch` → installs EVERYTHING in the table above
+6. switches your shell to zsh
+7. prints the next steps
 
-Pode rodar de novo à vontade (é idempotente). `./bootstrap.sh --yes` não pergunta nada.
+Run it again whenever you want (it is idempotent). `./bootstrap.sh --yes` asks no questions.
 
-### 1.3 Logins (uma vez)
+### 1.3 Logins (once)
 
 ```bash
-exec zsh -l             # ou feche e abra o terminal
-gh auth login           # GitHub (também vira o credential helper do git)
-claude                  # Claude Code — o login abre no navegador do Windows
+exec zsh -l             # or close and reopen the terminal
+gh auth login           # GitHub (also becomes git's credential helper)
+claude                  # Claude Code — login opens in the Windows browser
 codex login             # OpenAI Codex CLI
 opencode auth login     # opencode
-herdr                   # ctrl+b q desanexa; `herdr` de novo reanexa
+herdr                   # ctrl+b q detaches; `herdr` again reattaches
 ```
 
-> O navegador do Windows abre via `wsl-open` (`$BROWSER`). Se algum login não abrir
-> sozinho, copie a URL que aparece no terminal e cole no navegador.
+> The Windows browser opens via `wsl-open` (`$BROWSER`). If a login does not open
+> on its own, copy the URL from the terminal and paste it into the browser.
 
 ---
 
-## 2. Zed: qual jeito usar? → **Zed do Windows + WSL remoto** ✅
+## 2. Zed: which way? → **Windows Zed + remote WSL** ✅
 
-O Zed para Windows abre pastas **dentro do WSL nativamente** (docs:
-<https://zed.dev/docs/remote-development> → "WSL Support"). A UI roda no Windows (GPU, fontes,
-atalhos nativos) e um servidor do Zed roda no Ubuntu — LSPs, terminal e git ficam no Linux.
+Zed for Windows opens folders **inside WSL natively** (docs:
+<https://zed.dev/docs/remote-development> → "WSL Support"). The UI runs on Windows (GPU, fonts,
+native shortcuts) and a Zed server runs in Ubuntu. LSPs, the terminal, and git stay on Linux.
 
-- Abrir: `Ctrl+Shift+P` → **`projects: open wsl`** → escolha `Ubuntu-26.04` → pasta (ex.: `~/code/meu-app`).
-- Pasta que já está no Windows: `projects: open folder in wsl`.
-- Depois, fica em **Remote Projects** pra abrir com 1 clique.
-- devenv/direnv: o Zed carrega o `.envrc` do projeto pros language servers (configuração `load_direnv`,
-  padrão "direct"). Rode `direnv allow` uma vez no terminal antes.
+- Open: `Ctrl+Shift+P` → **`projects: open wsl`** → choose `Ubuntu-26.04` → a folder (for example `~/code/my-app`).
+- A folder that is already on Windows: `projects: open folder in wsl`.
+- After that it stays under **Remote Projects**, one click to reopen.
+- devenv/direnv: Zed loads the project's `.envrc` for language servers (`load_direnv`,
+  default "direct"). Run `direnv allow` once in the terminal first.
 
-**Por que não rodar o Zed Linux dentro do WSL (WSLg)?** Funciona, mas é renderizado por
-WSLg (sem aceleração nativa, janela "estrangeira", clipboard/IME/HiDPI mais frágeis). Se mesmo
-assim quiser: descomente `zed-editor` em `home.nix` e rode `hms`; o comando é `zeditor`.
+**Why not run Linux Zed inside WSL (WSLg)?** It works, but WSLg draws it (no native acceleration, a "foreign" window, and clipboard/IME/HiDPI are more fragile). If you still want it: uncomment `zed-editor` in `home.nix` and run `hms`; the command is `zeditor`.
 
 ---
 
-## 3. Dia a dia
+## 3. Day to day
 
-| Quero... | Comando |
+| I want to... | Command |
 |---|---|
-| Aplicar mudança no `home.nix` / `user.nix` | `hms` |
-| Atualizar **todos** os pacotes | `hmu` (= `nix flake update` + `home-manager switch`) |
-| Adicionar um programa | coloque em `home.packages` no `home.nix` → `hms` → `git commit` |
-| Procurar um pacote | `nix search nixpkgs <nome>` ou <https://search.nixos.org> |
-| Testar algo sem instalar | `nix shell nixpkgs#cowsay -c cowsay oi` |
-| LazyVim (opcional) | `lazyvim-init` (só se `~/.config/nvim` não existir) |
-| Abrir pasta no Explorer | `explorer` |
+| Apply a change in `home.nix` / `user.nix` | `hms` |
+| Update **every** package | `hmu` (= `nix flake update` + `home-manager switch`) |
+| Add a program | put it in `home.packages` in `home.nix` → `hms` → `git commit` |
+| Search for a package | `nix search nixpkgs <name>` or <https://search.nixos.org> |
+| Try something without installing it | `nix shell nixpkgs#cowsay -c cowsay hi` |
+| LazyVim (optional) | `lazyvim-init` (only if `~/.config/nvim` does not exist) |
+| Open the folder in Explorer | `explorer` |
 
-Depois de `hmu`, **commite o `flake.lock`** — é ele que garante que outra máquina fique idêntica.
+After `hmu`, **commit `flake.lock`**. That file is what makes another machine identical.
 
-### Projeto novo com devenv
+### A new project with devenv
 
 ```bash
-# na pasta do clone (my-dotfiles, ou o nome que você deu)
-mkdir -p ~/code && cp -r templates/node ~/code/meu-app   # ou templates/python
-cd ~/code/meu-app
-direnv allow            # 1ª vez baixa as coisas; depois entra em <100 ms
+# in the clone folder (my-dotfiles, or whatever you named it)
+mkdir -p ~/code && cp -r templates/node ~/code/my-app   # or templates/python
+cd ~/code/my-app
+direnv allow            # the first time downloads things; later it enters in <100 ms
 ```
 
-- Troque a versão no `devenv.nix` (`pkgs.nodejs_22/24/26`, `pkgs.python312/313/314`).
-- Serviços sem Docker: `services.postgres.enable = true;` → `devenv up`.
-- Scripts: `dev` (node) / `tests` (python) já vêm de exemplo.
-- Commite `devenv.nix`, `devenv.yaml`, `devenv.lock` e `.envrc`.
-- Opções: <https://devenv.sh/reference/options/>
+- Change the version in `devenv.nix` (`pkgs.nodejs_22/24/26`, `pkgs.python312/313/314`).
+- Services without Docker: `services.postgres.enable = true;` → `devenv up`.
+- Scripts: `dev` (node) / `tests` (python) already come as examples.
+- Commit `devenv.nix`, `devenv.yaml`, `devenv.lock`, and `.envrc`.
+- Options: <https://devenv.sh/reference/options/>
 
 ---
 
-## 4. Rollback (deu ruim depois de atualizar)
+## 4. Rollback (an update went badly)
 
 ```bash
-home-manager generations                 # lista: data, id, caminho
-/nix/store/<hash>-home-manager-generation/activate   # volta pra uma geração anterior
+home-manager generations                 # lists: date, id, path
+/nix/store/<hash>-home-manager-generation/activate   # returns to an earlier generation
 ```
 
-Ou pelo git (melhor): `git checkout <commit-bom> -- flake.lock home.nix && hms`.
+Or with git (better): `git checkout <good-commit> -- flake.lock home.nix && hms`.
 
-Limpar gerações velhas e liberar disco:
+Drop old generations and free disk:
 
 ```bash
 home-manager expire-generations "-30 days"
@@ -210,58 +207,56 @@ nix-collect-garbage
 
 ---
 
-## 5. Backup e restauração
+## 5. Backup and restore
 
-**Backup de verdade = este repo no GitHub** (config) + seus projetos no GitHub.
-Se o WSL morrer: `wsl --unregister Ubuntu-26.04`, reinstala, `./bootstrap.sh`. Pronto.
+**The real backup is this repo on GitHub** (the config) plus your projects on GitHub.
+If WSL dies: `wsl --unregister Ubuntu-26.04`, reinstall, `./bootstrap.sh`. Done.
 
-Backup da distro inteira (inclui arquivos soltos em `~`), no PowerShell:
+A backup of the whole distro (including loose files in `~`), in PowerShell:
 
 ```powershell
 wsl --shutdown
 wsl --export Ubuntu-26.04 D:\backup\ubuntu-2604.tar
-# restaurar (em outra pasta/PC):
+# restore (on another folder/PC):
 wsl --import Ubuntu-26.04 C:\WSL\Ubuntu-26.04 D:\backup\ubuntu-2604.tar
 ```
 
-Depois de `--import` o WSL entra como **root**. Conserte com:
+After `--import`, WSL logs in as **root**. Fix it with:
 
 ```bash
-printf '[user]\ndefault=hitsu\n' | sudo tee -a /etc/wsl.conf    # troque hitsu
+printf '[user]\ndefault=hitsu\n' | sudo tee -a /etc/wsl.conf    # change hitsu
 ```
 
-e `wsl --shutdown` no PowerShell.
+and `wsl --shutdown` in PowerShell.
 
 ---
 
-## 6. Pegadinhas do WSL (leia!)
+## 6. WSL traps (read this)
 
-- **Projetos SEMPRE em `~/` (ex.: `~/code`), nunca em `/mnt/c/...`.** O disco do Windows via WSL é
-  muito mais lento (npm install, git status, LSP) e quebra permissões/watchers.
-  Acessar os arquivos do Linux pelo Explorer: `\\wsl$\Ubuntu-26.04\home\hitsu` (ou `explorer` no terminal).
-- **Não instale Node/Python no Windows "pra usar no WSL".** Dentro do WSL o PATH do Windows entra
-  no final; os do Nix vêm primeiro, mas evite confusão: `which node` deve apontar pra `~/.nix-profile`
-  ou `/nix/store`.
-- **CRLF:** o `.gitattributes` força LF (e CRLF no `windows/setup.ps1`, que também leva BOM UTF-8). Se clonar no Windows com `core.autocrlf=true`, o
-  `bootstrap.sh` quebra (`/bin/bash^M`). Clone **dentro** do WSL.
-- **Mudou o `.wslconfig`?** `wsl --shutdown` e espere ~8 s.
-- **`sparseVhd`** só vale pra distro criada depois do `.wslconfig` — por isso o `setup.ps1` copia antes de instalar.
-- **Rede mirrored:** `localhost:3000` do WSL abre direto no navegador do Windows (e vice-versa).
-- **Arquivos novos no flake:** o Nix só enxerga arquivos rastreados pelo git → `git add` antes do `hms`.
-- **Atualizações das IAs:** `claude`/`codex`/`opencode` vêm do Nix; o auto-update interno delas não
-  funciona (o do Claude já vem desligado). Atualize com `hmu`. Se o nixpkgs atrasar e você precisar
-  de uma versão do dia, use os instaladores oficiais temporariamente:
+- **Projects ALWAYS live in `~/` (for example `~/code`), never in `/mnt/c/...`.** The Windows disk through WSL is
+  much slower (npm install, git status, LSP) and breaks permissions and file watchers.
+  Reach the Linux files from Explorer: `\\wsl$\Ubuntu-26.04\home\hitsu` (or `explorer` in the terminal).
+- **Do not install Node/Python on Windows "to use them in WSL".** Inside WSL the Windows PATH is appended
+  at the end; Nix comes first, but avoid the confusion: `which node` should point at `~/.nix-profile`
+  or `/nix/store`.
+- **CRLF:** `.gitattributes` forces LF (and CRLF for `windows/setup.ps1`, which also carries a UTF-8 BOM). If you clone on Windows with `core.autocrlf=true`,
+  `bootstrap.sh` breaks (`/bin/bash^M`). Clone **inside** WSL.
+- **Changed `.wslconfig`?** `wsl --shutdown` and wait about 8 seconds.
+- **`sparseVhd`** only applies to a distro created after `.wslconfig` is in place, which is why `setup.ps1` copies it before installing.
+- **Mirrored networking:** `localhost:3000` in WSL opens directly in the Windows browser (and the other way around).
+- **New files in the flake:** Nix only sees files tracked by git → `git add` before `hms`.
+- **AI updates:** `claude`/`codex`/`opencode` come from Nix; their internal auto-update does not
+  work (Claude's is already off). Update with `hmu`. If nixpkgs lags and you need today's build, use the official installers temporarily:
   - Claude Code: `curl -fsSL https://claude.ai/install.sh | bash` · <https://code.claude.com/docs/en/setup>
   - Codex: `curl -fsSL https://chatgpt.com/codex/install.sh | sh` · <https://github.com/openai/codex>
   - opencode: `curl -fsSL https://opencode.ai/v2/install | bash` · <https://opencode.ai>
   - herdr: `curl -fsSL https://herdr.dev/install.sh | sh` · <https://github.com/herdrdev/herdr>
-  (o `~/.local/bin` fica DEPOIS do Nix no PATH; pra usar a versão manual, tire o pacote do `home.nix` e rode `hms`. Confira com `which -a claude`.)
-- **NixOS-WSL?** Dá pra ter como 2ª distro pra brincar, mas binários prontos (npm/pip com
-  binários, SDKs) precisam de `nix-ld`. Por isso a base aqui é Ubuntu.
+  (`~/.local/bin` comes AFTER Nix on PATH; to use the manual build, remove the package from `home.nix` and run `hms`. Check with `which -a claude`.)
+- **NixOS-WSL?** You can keep it as a second distro to play with, but prebuilt binaries (npm/pip binaries, SDKs) need `nix-ld`. That is why the base here is Ubuntu.
 
 ---
 
-## 7. Desinstalar o Nix (se um dia quiser)
+## 7. Uninstall Nix (if you ever want to)
 
 ```bash
 /nix/nix-installer uninstall
