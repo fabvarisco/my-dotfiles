@@ -1,41 +1,41 @@
 # ============================================================================
-#  Ambiente Node por projeto.  Copie: devenv.nix + devenv.yaml + .envrc
-#  Uso:  cd projeto && direnv allow     (ou: devenv shell)
-#  Docs: https://devenv.sh/languages/javascript/   (opções: https://devenv.sh/reference/options/)
+#  Per-project Node environment.  Copy: devenv.nix + devenv.yaml + .envrc
+#  Use:  cd project && direnv allow     (or: devenv shell)
+#  Docs: https://devenv.sh/languages/javascript/   (options: https://devenv.sh/reference/options/)
 # ============================================================================
 { pkgs, ... }:
 
 {
-  # Ferramentas extras só deste projeto
+  # Extra tools for this project only
   packages = [
     pkgs.git
   ];
 
   languages.javascript = {
     enable = true;
-    package = pkgs.nodejs_24; # TROQUE a versão por projeto: nodejs_22, nodejs_24, nodejs_26...
+    package = pkgs.nodejs_24; # CHANGE the version per project: nodejs_22, nodejs_24, nodejs_26...
 
-    # Escolha UM gerenciador:
+    # Pick ONE package manager:
     npm.enable = true;
     # pnpm.enable = true;
     # bun.enable = true;
 
-    # Roda `npm install` ao entrar no shell se package.json existir:
+    # Run `npm install` when entering the shell if package.json exists:
     # npm.install.enable = true;
   };
 
-  # TypeScript LSP etc. ficam melhor no package.json do projeto (devDependencies).
+  # TypeScript LSP and similar belong in the project's package.json (devDependencies).
 
-  # Variáveis de ambiente do projeto
+  # Project environment variables
   env.NODE_ENV = "development";
 
-  # Comandos nomeados:  `dev`  dentro do shell
+  # Named commands:  `dev`  inside the shell
   scripts.dev.exec = "npm run dev";
 
-  # Processos de longa duração:  `devenv up`
+  # Long-running processes:  `devenv up`
   # processes.web.exec = "npm run dev";
 
-  # Serviços (sem Docker!), ex.:
+  # Services (no Docker!), for example:
   # services.postgres.enable = true;
   # services.redis.enable = true;
 
@@ -43,6 +43,6 @@
     echo "🟢 Node $(node --version) | npm $(npm --version)"
   '';
 
-  # Git hooks (rodam no commit):
+  # Git hooks (they run on commit):
   # git-hooks.hooks.prettier.enable = true;
 }

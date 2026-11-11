@@ -1,49 +1,49 @@
 # ============================================================================
-#  .wslconfig  (arquivo so em ASCII de proposito: o parser do WSL e chato)
-#  .wslconfig  vai em C:\Users\<SeuUsuario>\.wslconfig  (o setup.ps1 copia)
-#  Vale pra TODAS as distros WSL2. Depois de mudar: `wsl --shutdown` e espere
-#  ~8 segundos antes de abrir de novo.
-#  Referencia: https://learn.microsoft.com/windows/wsl/wsl-config
+#  .wslconfig  (ASCII on purpose: the WSL parser is picky)
+#  .wslconfig lives at C:\Users\<YourUser>\.wslconfig  (setup.ps1 copies it)
+#  It applies to EVERY WSL2 distro. After a change: `wsl --shutdown` and wait
+#  ~8 seconds before opening WSL again.
+#  Reference: https://learn.microsoft.com/windows/wsl/wsl-config
 # ============================================================================
 
 [wsl2]
-# RAM maxima da VM do WSL. Padrao = 50% da RAM do Windows.
-# Regra pratica: metade da RAM (16 GB -> 8GB, 32 GB -> 16GB). AJUSTE AO SEU PC.
+# Max RAM for the WSL VM. Default = 50% of Windows RAM.
+# Practical rule: half of RAM (16 GB -> 8GB, 32 GB -> 16GB). ADJUST FOR YOUR PC.
 memory=8GB
 
-# Nucleos logicos que o WSL pode usar. Padrao = todos. Deixe uns livres pro Windows.
-# AJUSTE: ex. 12 threads -> 8.
+# Logical cores WSL may use. Default = all of them. Leave some free for Windows.
+# ADJUST: e.g. 12 threads -> 8.
 processors=8
 
-# Swap (arquivo no disco). 0 desliga. 4GB evita OOM em builds pesados do Nix.
+# Swap file on disk. 0 disables it. 4GB avoids OOM during heavy Nix builds.
 swap=4GB
 
-# Rede "mirrored": WSL enxerga as mesmas interfaces do Windows.
-#  - localhost funciona nos DOIS sentidos (dev server do WSL abre no navegador do Windows)
-#  - funciona melhor com VPN
+# "mirrored" network: WSL sees the same interfaces as Windows.
+#  - localhost works in BOTH directions (a WSL dev server opens in the Windows browser)
+#  - works better with a VPN
 networkingMode=mirrored
 
-# DNS via Windows (resolve problemas de DNS com VPN). Padrao ja e true.
+# DNS through Windows (fixes DNS problems with a VPN). The default is already true.
 dnsTunneling=true
 
-# Respeita o proxy do Windows, se houver.
+# Honor the Windows proxy, if there is one.
 autoProxy=true
 
-# Firewall do Windows filtra o trafego do WSL (seguro; padrao true).
+# The Windows firewall filters WSL traffic (safe; default true).
 firewall=true
 
-# GUI de apps Linux (WSLg). Mantido ligado caso queira rodar o Zed Linux.
+# GUI for Linux apps (WSLg). Left on in case you want to run Linux Zed.
 guiApplications=true
 
 [experimental]
-# Devolve pro Windows a RAM de cache que o Linux nao esta usando.
-# "gradual" = devagar e sem travadas. (Outras opcoes: dropCache, disabled)
+# Give Windows back cache RAM that Linux is not using.
+# "gradual" = slow and without freezes. (Other options: dropCache, disabled)
 autoMemoryReclaim=gradual
 
-# VHD novo ja nasce "sparse": quando voce apaga arquivos no Linux, o .vhdx
-# encolhe no disco do Windows. So afeta distros instaladas DEPOIS desta config
-# (por isso copie este arquivo ANTES do `wsl --install`).
+# A new VHD is born "sparse": when you delete files in Linux, the .vhdx
+# shrinks on the Windows disk. This only affects distros installed AFTER this
+# config (which is why this file is copied BEFORE `wsl --install`).
 sparseVhd=true
 
-# Com mirrored: permite Windows <-> WSL se falarem pelo IP da maquina (nao so localhost).
+# With mirrored networking: allow Windows <-> WSL via the machine IP (not only localhost).
 hostAddressLoopback=true

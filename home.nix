@@ -141,20 +141,27 @@ in
             IFS= read -r dir < "$HOME/.local/share/wsl-nix/flake-dir"
           fi
           if [[ -z $dir || ! -d $dir ]]; then
-            echo "Não achei o flake. Rode ./bootstrap.sh na pasta do clone (ele grava ~/.local/share/wsl-nix/flake-dir)." >&2
+            echo "Could not find the flake. Run ./bootstrap.sh from the clone (it writes ~/.local/share/wsl-nix/flake-dir)." >&2
             return 1
           fi
           printf '%s\n' "$dir"
         }
+        # Covers an upstream Nix that has not enabled flakes yet. The same
+        # line is written to nix.conf by bootstrap.sh for later shells.
+        with_nix_flakes() {
+          NIX_CONFIG="''${NIX_CONFIG:+$NIX_CONFIG$'\n'}experimental-features = nix-command flakes" \
+            "$@"
+        }
         hms() {
           local dir
           dir="$(hm-flake-dir)" || return
-          home-manager switch --flake "$dir"
+          with_nix_flakes home-manager switch --flake "$dir"
         }
         hmu() {
           local dir
           dir="$(hm-flake-dir)" || return
-          nix flake update --flake "$dir" && home-manager switch --flake "$dir"
+          with_nix_flakes nix --extra-experimental-features 'nix-command flakes' flake update --flake "$dir" \
+            && with_nix_flakes home-manager switch --flake "$dir"
         }
       '')
       (lib.mkOrder 1500 ''
@@ -275,12 +282,12 @@ in
       set -euo pipefail
       cfg="''${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
       if [ -e "$cfg" ]; then
-        echo "Já existe $cfg — não vou sobrescrever. Faça backup/remova e rode de novo."
+        echo "Already exists: $cfg — I will not overwrite it. Back it up or remove it, then run this again."
         exit 1
       fi
       git clone https://github.com/LazyVim/starter "$cfg"
       rm -rf "$cfg/.git"
-      echo "LazyVim instalado em $cfg. Abra o nvim e espere os plugins baixarem."
+      echo "LazyVim installed in $cfg. Open nvim and wait for the plugins to download."
     '';
   };
 
@@ -299,25 +306,25 @@ in
     key = "prefix+u"
     type = "plugin_action"
     command = "chmarax.gitview.toggle"
-    description = "gitview na aba atual"
+    description = "gitview in the current tab"
 
     [[keys.command]]
     key = "prefix+d"
     type = "plugin_action"
     command = "chmarax.gitview.toggle-tab"
-    description = "gitview numa aba"
+    description = "gitview in its own tab"
 
     [[keys.command]]
     key = "prefix+a"
     type = "plugin_action"
     command = "chmarax.herdr-nvim.toggle"
-    description = "sidebar do nvim"
+    description = "nvim sidebar"
 
     [[keys.command]]
     key = "prefix+f"
     type = "plugin_action"
     command = "chmarax.herdr-nvim.pick-file"
-    description = "abrir arquivo que o agente tocou"
+    description = "open a file the agent touched"
   '';
 
   # Enter on a diff opens Nix's nvim, instead of falling through to xdg-open (no compositor).

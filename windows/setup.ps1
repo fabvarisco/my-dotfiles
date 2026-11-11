@@ -18,53 +18,53 @@ param(
 )
 $ErrorActionPreference = "Stop"
 
-Write-Host "==> Atualizando o WSL" -ForegroundColor Green
+Write-Host "==> Updating WSL" -ForegroundColor Green
 wsl --update
 
-Write-Host "==> Copiando .wslconfig" -ForegroundColor Green
+Write-Host "==> Copying .wslconfig" -ForegroundColor Green
 $src = Join-Path $PSScriptRoot ".wslconfig"
 $dst = Join-Path $env:USERPROFILE ".wslconfig"
 if (Test-Path $dst) {
   $bak = "$dst.bak-$(Get-Date -Format yyyyMMdd-HHmmss)"
   Copy-Item $dst $bak
-  Write-Host "    backup do antigo: $bak"
+  Write-Host "    backup of the old file: $bak"
 }
 Copy-Item $src $dst -Force
-Write-Host "    -> $dst  (ajuste memory/processors pro seu PC!)" -ForegroundColor Yellow
+Write-Host "    -> $dst  (adjust memory/processors for your PC!)" -ForegroundColor Yellow
 
 # Apply the new config before creating the distro (sparseVhd only applies to a new VHD)
 wsl --shutdown
 
-Write-Host "==> Distros instaladas:" -ForegroundColor Green
+Write-Host "==> Installed distros:" -ForegroundColor Green
 $installed = (wsl --list --quiet 2>$null) -replace "`0", "" | Where-Object { $_ -ne "" }
 $installed | ForEach-Object { Write-Host "    $_" }
 
 if ($installed -contains $Distro) {
-  Write-Host "==> $Distro já está instalada — pulando." -ForegroundColor Green
+  Write-Host "==> $Distro is already installed — skipping." -ForegroundColor Green
 } else {
-  Write-Host "==> Instalando $Distro (vai pedir usuário e senha do Linux)" -ForegroundColor Green
-  Write-Host "    Dica: use o MESMO usuário que está em user.nix (padrão: hitsu)."
+  Write-Host "==> Installing $Distro (it will ask for a Linux username and password)" -ForegroundColor Green
+  Write-Host "    Tip: use the SAME username as user.nix (default: hitsu)."
   # See the available names with: wsl --list --online
   wsl --install -d $Distro
 }
 
 if (-not $SkipZed) {
   if (Get-Command winget -ErrorAction SilentlyContinue) {
-    Write-Host "==> Instalando Zed for Windows (winget)" -ForegroundColor Green
+    Write-Host "==> Installing Zed for Windows (winget)" -ForegroundColor Green
     winget install -e --id ZedIndustries.Zed --accept-source-agreements --accept-package-agreements
   } else {
-    Write-Host "winget não encontrado — baixe o Zed em https://zed.dev/download" -ForegroundColor Yellow
+    Write-Host "winget was not found — download Zed from https://zed.dev/download" -ForegroundColor Yellow
   }
 }
 
 Write-Host ""
-Write-Host "Próximo passo, DENTRO do Ubuntu:" -ForegroundColor Cyan
+Write-Host "Next step, INSIDE Ubuntu:" -ForegroundColor Cyan
 Write-Host "  git clone -b wsl/ubuntu-nix https://github.com/fabvarisco/my-dotfiles"
 Write-Host "  cd my-dotfiles && ./bootstrap.sh"
-Write-Host "  (outra pasta tambem serve: o bootstrap usa o diretorio do proprio script)"
+Write-Host "  (another folder name is fine: bootstrap uses the script's own directory)"
 Write-Host ""
-Write-Host "Backup da distro inteira (rode de vez em quando):" -ForegroundColor Cyan
+Write-Host "Full distro backup (run this from time to time):" -ForegroundColor Cyan
 Write-Host "  wsl --shutdown"
 Write-Host "  wsl --export $Distro D:\backup\ubuntu-2604.tar"
-Write-Host "Restaurar:"
+Write-Host "Restore:"
 Write-Host "  wsl --import $Distro C:\WSL\$Distro D:\backup\ubuntu-2604.tar"

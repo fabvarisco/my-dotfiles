@@ -1,7 +1,7 @@
-# Plugins do herdr TUI (0.9.5) que rodam no WSL sem compositor.
-# nixpkgs não tem herdr-gitview nem herdr-nvim. O fonte é o tag de release
-# (rev pinado) e o binário é o asset Linux que o herdr/install.sh baixa.
-# herdr-chat não entra aqui: é mod do app desktop, só macOS.
+# herdr TUI plugins (0.9.5) that run on WSL without a compositor.
+# nixpkgs has neither herdr-gitview nor herdr-nvim. The source is the release
+# tag (pinned rev) and the binary is the Linux asset their herdr/install.sh downloads.
+# herdr-chat is not included: it is a macOS desktop-app mod.
 { pkgs }:
 
 let
@@ -34,7 +34,7 @@ let
     hash = "sha256-41tbpzmJzyAmLaz8i/tOytBgSJ2eO+o77v9fWELY1xg=";
   };
 
-  # Raiz que o `herdr plugin link` registra. O binário oficial fica em bin/.
+  # Root registered by `herdr plugin link`. The upstream binary lives in bin/.
   herdr-gitview = pkgs.stdenv.mkDerivation {
     pname = "herdr-gitview-plugin";
     version = "0.5.0";
@@ -48,8 +48,8 @@ let
       mkdir -p "$out/bin"
       tar -xzf ${gitviewBin} -C "$out/bin"
       chmod 755 "$out/bin/herdr-gitview"
-      # O run.sh upstream só acrescenta Homebrew/cargo. O git e o nvim
-      # deste setup estão em ~/.nix-profile/bin.
+      # Upstream run.sh only adds Homebrew/cargo. git and nvim for this
+      # setup live in ~/.nix-profile/bin.
       substituteInPlace "$out/herdr/run.sh" \
         --replace-fail \
         'PATH="$PATH:/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$HOME/.cargo/bin"' \
@@ -67,8 +67,8 @@ let
       cp -a . "$out/"
       chmod -R u+w "$out"
       install -m 755 ${nvimBin} "$out/bin/herdr-nvim.bin"
-      # O manifesto chama bin/herdr-nvim. O binário não põe o perfil Nix
-      # no PATH (só Homebrew e ~/.local); o wrapper acrescenta.
+      # The manifest calls bin/herdr-nvim. The binary does not put the Nix
+      # profile on PATH (only Homebrew and ~/.local); the wrapper adds it.
       cat > "$out/bin/herdr-nvim" << 'EOF'
       #!/bin/sh
       dir=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
@@ -79,7 +79,7 @@ let
     '';
   };
 
-  # plugins.json no formato que o herdr 0.9.5 grava em `plugin link`.
+  # plugins.json in the shape herdr 0.9.5 writes for `plugin link`.
   registry = pkgs.runCommand "herdr-plugins-json" { nativeBuildInputs = [ pkgs.herdr ]; } ''
     export HOME=$TMPDIR/home
     export XDG_CONFIG_HOME=$TMPDIR/config

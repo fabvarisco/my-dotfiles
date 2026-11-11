@@ -118,7 +118,7 @@ If the clone is under `/mnt/c/...` (the Windows disk), the script copies it to `
 `bootstrap.sh`:
 1. `apt` with only the minimum (curl, git, xz, zsh, build-essential, locales)
 2. checks that systemd is on (Ubuntu on WSL already ships with it)
-3. installs Nix with the Determinate Systems installer (flakes already enabled)
+3. installs Nix with the Determinate Systems installer when Nix is missing (flakes already enabled). If Nix is already installed, including upstream Nix, the script keeps it, turns on `nix-command` and `flakes` in its config, and passes those features on every `nix` command
 4. adds your user to `trusted-users` (so devenv's binary cache works)
 5. `home-manager switch` → installs EVERYTHING in the table above
 6. switches your shell to zsh

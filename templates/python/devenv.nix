@@ -1,7 +1,7 @@
 # ============================================================================
-#  Ambiente Python por projeto (com uv).  Copie: devenv.nix + devenv.yaml + .envrc
-#  Uso:  cd projeto && direnv allow     (ou: devenv shell)
-#  Docs: https://devenv.sh/languages/python/   (opções: https://devenv.sh/reference/options/)
+#  Per-project Python environment (with uv).  Copy: devenv.nix + devenv.yaml + .envrc
+#  Use:  cd project && direnv allow     (or: devenv shell)
+#  Docs: https://devenv.sh/languages/python/   (options: https://devenv.sh/reference/options/)
 # ============================================================================
 { pkgs, ... }:
 
@@ -12,23 +12,23 @@
 
   languages.python = {
     enable = true;
-    package = pkgs.python313; # TROQUE por projeto: python312, python313, python314...
+    package = pkgs.python313; # CHANGE per project: python312, python313, python314...
 
-    # .venv gerenciado + uv
+    # managed .venv + uv
     venv.enable = true;
     uv = {
       enable = true;
-      # Roda `uv sync` ao entrar no shell (precisa de pyproject.toml):
+      # Run `uv sync` when entering the shell (needs pyproject.toml):
       # sync.enable = true;
     };
   };
 
   env.PYTHONDONTWRITEBYTECODE = "1";
 
-  # Comandos nomeados:  `tests`  dentro do shell (não use "test": é builtin do shell)
+  # Named commands:  `tests`  inside the shell (do not use "test": it is a shell builtin)
   scripts.tests.exec = "uv run pytest \"$@\"";
 
-  # Serviços (sem Docker!), ex.:
+  # Services (no Docker!), for example:
   # services.postgres.enable = true;
 
   enterShell = ''
