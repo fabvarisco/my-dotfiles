@@ -3,10 +3,10 @@
 
 Each output cell is one column and two pixels: ▀ uses the top pixel as the
 foreground and the bottom pixel as the background. A transparent cell is a
-space. The committed assets/nyanca-chibi.ans is the original art; this script
+space. The committed assets/byanca-chibi.ans is the original art; this script
 is only for regenerating a size. Needs Pillow.
 
-    python3 assets/gen-chibi.py assets/nyanca-chibi.png -o /tmp/chibi.ans --width 48
+    python3 assets/gen-chibi.py assets/byanca-chibi.png -o /tmp/chibi.ans --width 48
 """
 
 from __future__ import annotations

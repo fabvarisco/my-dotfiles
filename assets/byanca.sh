@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Print the chibi Nyanca. Home-manager installs this as `nyanca`.
+# Print the chibi Byanca. Home-manager installs this as `byanca`.
 # NO_COLOR, or a locale that is not UTF-8, prints the plain ASCII cat.
 set -euo pipefail
 
-art="${NYANCA_ART:-}"
+art="${BYANCA_ART:-}"
 if [ -z "$art" ]; then
-  art="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/nyanca-chibi.ans"
+  art="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/byanca-chibi.ans"
 fi
 
-nyanca_utf8() {
+byanca_utf8() {
   local charmap lang
   charmap="$(locale charmap 2>/dev/null || true)"
   case "$charmap" in
@@ -21,7 +21,7 @@ nyanca_utf8() {
   return 1
 }
 
-if [ -n "${NO_COLOR:-}" ] || ! nyanca_utf8; then
+if [ -n "${NO_COLOR:-}" ] || ! byanca_utf8; then
   cat <<'EOF'
     /\_/\
    ( o.o )
@@ -31,10 +31,10 @@ if [ -n "${NO_COLOR:-}" ] || ! nyanca_utf8; then
  (  |   |  )
   \_|___|_/
    /_/ \_\
-  wsl/ubuntu-nix  -  crafted by Nyanca  nya~
+  wsl/ubuntu-nix  -  crafted by Byanca  nya~
 EOF
   exit 0
 fi
 
 cat "$art"
-printf '\033[38;2;208;208;255m%s\033[0m\n' '>> crafted by Nyanca  ฅ^•ﻌ•^ฅ  nya~'
+printf '\033[38;2;208;208;255m%s\033[0m\n' '>> crafted by Byanca  ฅ^•ﻌ•^ฅ  nya~'

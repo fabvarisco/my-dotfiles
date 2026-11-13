@@ -92,7 +92,7 @@ confirm_no() { # confirm_no "question" -> 0 = yes (default no)
   [[ "$ans" =~ ^[Yy] ]]
 }
 
-# Nyanca's mark. A truecolor UTF-8 TTY at least 110 columns wide gets the
+# Byanca's mark. A truecolor UTF-8 TTY at least 110 columns wide gets the
 # chibi beside the block title; 50–109 columns stack the title under the
 # chibi. Otherwise the braille cat, electric blue fading into cyan. A locale
 # that is not UTF-8 keeps the plain ASCII cat. NO_COLOR or a non-TTY prints
@@ -225,20 +225,20 @@ print_banner_chibi() {
   local -a chibi=() title_lines=() right=()
 
   dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)" || return 1
-  art="$dir/assets/nyanca-chibi.ans"
+  art="$dir/assets/byanca-chibi.ans"
   [ -f "$art" ] || return 1
   mapfile -t chibi < "$art"
   n=${#chibi[@]}
   [ "$n" -gt 0 ] || return 1
 
-  mapfile -t title_lines <<'NYANCA_TITLE'
-███╗   ██╗██╗   ██╗ █████╗ ███╗   ██╗ ██████╗ █████╗
-████╗  ██║╚██╗ ██╔╝██╔══██╗████╗  ██║██╔════╝██╔══██╗
-██╔██╗ ██║ ╚████╔╝ ███████║██╔██╗ ██║██║     ███████║
-██║╚██╗██║  ╚██╔╝  ██╔══██║██║╚██╗██║██║     ██╔══██║
-██║ ╚████║   ██║   ██║  ██║██║ ╚████║╚██████╗██║  ██║
-╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝
-NYANCA_TITLE
+  mapfile -t title_lines <<'BYANCA_TITLE'
+██████╗ ██╗   ██╗ █████╗ ███╗   ██╗ ██████╗ █████╗
+██╔══██╗╚██╗ ██╔╝██╔══██╗████╗  ██║██╔════╝██╔══██╗
+██████╔╝ ╚████╔╝ ███████║██╔██╗ ██║██║     ███████║
+██╔══██╗  ╚██╔╝  ██╔══██║██║╚██╗██║██║     ██╔══██║
+██████╔╝   ██║   ██║  ██║██║ ╚████║╚██████╗██║  ██║
+╚═════╝    ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝
+BYANCA_TITLE
 
   chibi_w=0
   for line in "${chibi[@]}"; do
@@ -281,7 +281,7 @@ NYANCA_TITLE
       left="$(banner_pad "${chibi[$i]}" "$chibi_w")"
       printf '%s  ' "$left"
       if [ "${right[$i]}" = $'\001' ]; then
-        banner_tagline '  >> wsl/ubuntu-nix bootstrap // crafted by Nyanca  ฅ^•ﻌ•^ฅ  nya~' 1 "$skip"
+        banner_tagline '  >> wsl/ubuntu-nix bootstrap // crafted by Byanca  ฅ^•ﻌ•^ฅ  nya~' 1 "$skip"
       else
         printf '%s\n' "${right[$i]}"
       fi
@@ -295,7 +295,7 @@ NYANCA_TITLE
       banner_paint "$j" "$title_n" "${title_lines[$j]}" 1
       j=$((j + 1))
     done
-    banner_tagline '  >> wsl/ubuntu-nix bootstrap // crafted by Nyanca  ฅ^•ﻌ•^ฅ  nya~' 1 "$skip"
+    banner_tagline '  >> wsl/ubuntu-nix bootstrap // crafted by Byanca  ฅ^•ﻌ•^ฅ  nya~' 1 "$skip"
   fi
   return 0
 }
@@ -316,7 +316,7 @@ print_banner_ascii() {
  (  |   |  )
   \_|___|_/
    /_/ \_\
-  wsl/ubuntu-nix bootstrap  -  crafted by Nyanca  nya~
+  wsl/ubuntu-nix bootstrap  -  crafted by Byanca  nya~
 EOF
   printf '%s\n' "$reset"
 }
@@ -346,7 +346,7 @@ print_banner() {
     fi
   fi
 
-  mapfile -t cat_lines <<'NYANCA_CAT'
+  mapfile -t cat_lines <<'BYANCA_CAT'
 ⢀⣠⣤⣤⣤⣤⣄⣀⡀⠀⠀⠀⠀⢀⣀⣠⣤⣤⣤⣤⣤⣄⣀⣀⠀⠀⠀⠀⠀⣀⣀⣤⣤⣤⣤⣄⣀⠀
 ⣿⡟⠛⠛⠛⠛⠛⠿⢿⣷⣦⣶⣿⠿⠿⠛⠛⠛⠛⠛⠛⠛⠻⠿⣿⣷⣦⣾⣿⠿⠟⠛⠛⠛⠛⠻⣿⡄
 ⣿⡇⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⣿⡇
@@ -363,15 +363,15 @@ print_banner() {
 ⠀⠀⠻⣿⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠁⠀⠈⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣾⡿⠁⠀⠀
 ⠀⠀⠀⠈⠻⢿⣷⣦⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣤⣴⣶⣿⠟⠋⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠈⠉⠛⠛⠻⠿⢿⣿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠿⠛⠛⠋⠉⠀⠀⠀⠀⠀⠀⠀
-NYANCA_CAT
-  mapfile -t title_lines <<'NYANCA_TITLE'
-███╗   ██╗██╗   ██╗ █████╗ ███╗   ██╗ ██████╗ █████╗
-████╗  ██║╚██╗ ██╔╝██╔══██╗████╗  ██║██╔════╝██╔══██╗
-██╔██╗ ██║ ╚████╔╝ ███████║██╔██╗ ██║██║     ███████║
-██║╚██╗██║  ╚██╔╝  ██╔══██║██║╚██╗██║██║     ██╔══██║
-██║ ╚████║   ██║   ██║  ██║██║ ╚████║╚██████╗██║  ██║
-╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝
-NYANCA_TITLE
+BYANCA_CAT
+  mapfile -t title_lines <<'BYANCA_TITLE'
+██████╗ ██╗   ██╗ █████╗ ███╗   ██╗ ██████╗ █████╗
+██╔══██╗╚██╗ ██╔╝██╔══██╗████╗  ██║██╔════╝██╔══██╗
+██████╔╝ ╚████╔╝ ███████║██╔██╗ ██║██║     ███████║
+██╔══██╗  ╚██╔╝  ██╔══██║██║╚██╗██║██║     ██╔══██║
+██████╔╝   ██║   ██║  ██║██║ ╚████║╚██████╗██║  ██║
+╚═════╝    ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝
+BYANCA_TITLE
 
   cat_n=${#cat_lines[@]}
   title_n=${#title_lines[@]}
@@ -430,7 +430,7 @@ NYANCA_TITLE
   fi
 
   banner_rule "$rule_w" "$color_on"
-  banner_tagline '  >> wsl/ubuntu-nix bootstrap // crafted by Nyanca  ฅ^•ﻌ•^ฅ  nya~' "$color_on" "$skip"
+  banner_tagline '  >> wsl/ubuntu-nix bootstrap // crafted by Byanca  ฅ^•ﻌ•^ฅ  nya~' "$color_on" "$skip"
 }
 
 if [ "${BOOTSTRAP_LIB_ONLY:-}" != 1 ]; then

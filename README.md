@@ -29,9 +29,9 @@ Long-lived branch of [my-dotfiles](https://github.com/fabvarisco/my-dotfiles), n
 ├── fastfetch/         # config, ASCII art, and random-logo.sh (also from fedora/sway)
 ├── bootstrap.sh       # run inside the new Ubuntu; uses its own directory
 ├── assets/
-│   ├── nyanca-chibi.ans  # truecolor chibi; `nyanca` prints it
-│   ├── nyanca-chibi.png  # source illustration
-│   ├── nyanca.sh         # the command home-manager installs
+│   ├── byanca-chibi.ans  # truecolor chibi; `byanca` prints it
+│   ├── byanca-chibi.png  # source illustration
+│   ├── byanca.sh         # the command home-manager installs
 │   └── gen-chibi.py      # redraw the ANSI art at another width (needs Pillow)
 ├── windows/
 │   ├── .wslconfig     # RAM/CPU limits, mirrored networking, sparse VHD
@@ -50,7 +50,7 @@ The prompt and fastfetch on this branch are the Fedora ones. Home-manager applie
 | **Starship** | `starship.toml` (palette `lock_dusk`, one-line prompt) becomes `programs.starship.settings`, integrated with zsh only. The username label changed from `@fedora` to `@wsl`. The `nix_shell` format from this WSL setup stays, so it shows up inside `nix shell` / devenv. |
 | **fastfetch** | `fastfetch/config.jsonc`, the three ASCII arts, and `random-logo.sh`. The package comes from `programs.fastfetch`; the files come from `xdg.configFile` (the module does not generate a second `config.jsonc`). On Fedora the script ran at the start of bash; here it runs at the end of interactive zsh. The built-in logo drawn alongside the ASCII arts changed from `fedora` to `ubuntu`. |
 
-`nyanca` prints the chibi, then `>> crafted by Nyanca  ฅ^•ﻌ•^ฅ  nya~` in lavender. Home-manager puts that command on `PATH`. `NO_COLOR`, or a locale that is not UTF-8, makes it print a plain ASCII cat instead. `./bootstrap.sh` draws the same chibi beside the block title when the terminal is truecolor, UTF-8, and at least 110 columns wide.
+`byanca` prints the chibi, then `>> crafted by Byanca  ฅ^•ﻌ•^ฅ  nya~` in lavender. Home-manager puts that command on `PATH`. `NO_COLOR`, or a locale that is not UTF-8, makes it print a plain ASCII cat instead. `./bootstrap.sh` draws the same chibi beside the block title when the terminal is truecolor, UTF-8, and at least 110 columns wide.
 
 The Fedora branch had no aliases, gitconfig, or Neovim config to bring over. Git (`programs.git`), the aliases (`ls`/`ll`/`g`/`v`…), and Neovim without a managed `init.lua` already belong to this WSL setup.
 

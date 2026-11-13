@@ -67,10 +67,10 @@ in
     nixfmt
     nil
 
-    # Chibi signature. `nyanca` prints assets/nyanca-chibi.ans.
-    (writeShellScriptBin "nyanca" ''
-      export NYANCA_ART=${./assets/nyanca-chibi.ans}
-      exec ${bash}/bin/bash ${./assets/nyanca.sh} "$@"
+    # Chibi signature. `byanca` prints assets/byanca-chibi.ans.
+    (writeShellScriptBin "byanca" ''
+      export BYANCA_ART=${./assets/byanca-chibi.ans}
+      exec ${bash}/bin/bash ${./assets/byanca.sh} "$@"
     '')
 
     # --- Zed INSIDE WSL (via WSLg) — left off on purpose.
