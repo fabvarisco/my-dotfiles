@@ -34,6 +34,8 @@ let
   '';
 in
 {
+  imports = [ ./godot.nix ];
+
   # -------------------------------------------------------------------
   # 1. USER
   # -------------------------------------------------------------------
@@ -86,8 +88,9 @@ in
     nodejs_22
     rustc
     cargo
-    # Godot 3.6 LTS. pkgs.godot3 is the GDScript editor.
-    godot3
+    
+    # Gamedev
+    godot_4_7
 
     # Terminal tools
     fastfetch
@@ -174,6 +177,18 @@ in
   # 4. PROGRAM MODULES
   # -------------------------------------------------------------------
 
+  # Zed Code Editor
+  programs.zed-editor = {
+    enable = true;
+    extensions = [ "nix" "toml" "elixir" "make" ];
+    userSettings = {
+      assistant = {
+        enabled = true;
+        version = "2";
+      };
+    };
+  };
+
   # Vicinae launcher. The Nix package looks for the EGL driver in
   # /run/opengl-driver, which does not exist on Fedora.
   programs.vicinae = {
@@ -202,6 +217,13 @@ in
     "PATH=%h/.nix-profile/bin:/usr/local/bin:/usr/bin"
     "XDG_DATA_DIRS=%h/.nix-profile/share:/usr/local/share:/usr/share"
   ];
+
+  # Nix Git links OpenSSL without Fedora's trust store, so HTTPS clones
+  # fail with "unable to get local issuer certificate".
+  programs.git = {
+    enable = true;
+    settings.http.sslCAInfo = "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem";
+  };
 
   # Fedora's ~/.bashrc reads ~/.bashrc.d before Nix is on PATH, so init
   # would use the store binary. The module integration stays off to avoid

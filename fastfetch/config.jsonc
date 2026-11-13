@@ -5,9 +5,20 @@
       "top": 1
     }
   },
+  "display": {
+    "color": {
+      "keys": "#81A1C1"
+    }
+  },
   "modules": [
     "title",
     "separator",
+    {
+      "type": "custom",
+      "key": " ",
+      "format": "System",
+      "outputColor": "#81A1C1"
+    },
     {
       "type": "os",
       "key": "OS"
@@ -17,6 +28,21 @@
       "key": "Kernel"
     },
     {
+      "type": "uptime",
+      "key": "Uptime"
+    },
+    {
+      "type": "host",
+      "key": "Host"
+    },
+    "break",
+    {
+      "type": "custom",
+      "key": " ",
+      "format": "Desktop",
+      "outputColor": "#81A1C1"
+    },
+    {
       "type": "wm",
       "key": "WM"
     },
@@ -24,13 +50,12 @@
       "type": "shell",
       "key": "Shell"
     },
+    "break",
     {
-      "type": "uptime",
-      "key": "Uptime"
-    },
-    {
-      "type": "host",
-      "key": "Host"
+      "type": "custom",
+      "key": " ",
+      "format": "Hardware",
+      "outputColor": "#81A1C1"
     },
     {
       "type": "cpu",

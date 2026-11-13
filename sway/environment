@@ -7,6 +7,12 @@ PATH="$HOME/.nix-profile/bin:$PATH"
 XDG_DATA_DIRS="$HOME/.nix-profile/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
 _JAVA_AWT_WM_NONREPARENTING=1
 
+# Nix OpenSSL does not see Fedora's trust store.
+SSL_CERT_FILE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+CURL_CA_BUNDLE=$SSL_CERT_FILE
+GIT_SSL_CAINFO=$SSL_CERT_FILE
+NIX_SSL_CERT_FILE=$SSL_CERT_FILE
+
 # SwayFX's Nix build looks for EGL and GBM under /run/opengl-driver.
 __EGL_VENDOR_LIBRARY_FILENAMES="$HOME/.nix-profile/share/glvnd/egl_vendor.d/50_mesa.json"
 LIBGL_DRIVERS_PATH="$HOME/.nix-profile/lib/dri"
