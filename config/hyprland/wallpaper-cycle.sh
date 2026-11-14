@@ -46,4 +46,22 @@ done
 
 mkdir -p "$(dirname "$CACHE_FILE")"
 echo "$SELECTED_WALL" >"$CACHE_FILE"
+
+# Keep StreamController Wall key thumbnail in sync.
+# SC skips --change-page when already on Beelink and caches Page JSON in memory,
+# so we point the key at a fixed symlink and force a blank→Beelink page bounce
+# (Image.open re-reads the symlink target on reload).
+ICONS_DIR="$HOME/.config/hypr/streamdeck-icons"
+WALL_ICON="$ICONS_DIR/wall-current.jpg"
+DECK_SERIAL="A00DA6191LL9"
+mkdir -p "$ICONS_DIR"
+ln -sfn "$SELECTED_WALL" "$WALL_ICON"
+
+if command -v streamcontroller >/dev/null 2>&1; then
+  streamcontroller --change-page "$DECK_SERIAL" _blank >/dev/null 2>&1 || true
+  # Brief pause so the blank page fully replaces Beelink before bouncing back.
+  sleep 0.15
+  streamcontroller --change-page "$DECK_SERIAL" Beelink >/dev/null 2>&1 || true
+fi
+
 notify-send "Wallpaper Changed" "$(basename "$SELECTED_WALL")"

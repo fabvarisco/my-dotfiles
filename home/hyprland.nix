@@ -73,6 +73,9 @@
     executable = true;
   };
 
+  home.file.".config/hypr/streamdeck-icons/gear.svg".source =
+    ../config/streamcontroller/icons/gear.svg;
+
   # Seed monitors.conf on first activation; hyprmon writes profiles here.
   # Not Nix-managed after creation — persists across rebuilds.
   home.activation.createMonitorsConf = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -86,6 +89,30 @@ monitor = desc:Dell Inc. DELL P3425WE, 3440x1440@100, 0x0, 1.0
 monitor = , preferred, auto, 1.0
 MONITORSEOF
     fi
+  '';
+
+  # Cursor / Grok icons change with the system profile; keep Stream Deck copies fresh.
+  home.activation.copyStreamdeckIcons = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    icons="$HOME/.config/hypr/streamdeck-icons"
+    mkdir -p "$icons"
+    for src in \
+      /run/current-system/sw/share/icons/hicolor/1024x1024/apps/cursor.png \
+      /etc/profiles/per-user/${user.username}/share/icons/hicolor/1024x1024/apps/cursor.png
+    do
+      if [ -f "$src" ]; then
+        cp -f "$src" "$icons/cursor.png"
+        break
+      fi
+    done
+    for src in \
+      /run/current-system/sw/share/icons/hicolor/512x512/apps/grok-bot.png \
+      /etc/profiles/per-user/${user.username}/share/icons/hicolor/512x512/apps/grok-bot.png
+    do
+      if [ -f "$src" ]; then
+        cp -f "$src" "$icons/grok-bot.png"
+        break
+      fi
+    done
   '';
   # Polkit authentication agent (needed by NetworkManager wifi connect, hyprlock, etc)
   systemd.user.services.hyprpolkitagent = {
