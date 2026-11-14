@@ -31,6 +31,15 @@ start() {
 }
 
 case "${1:-}" in
+  replay-start)
+    if running; then
+      notify-send "Replay Buffer" "Already running"
+    elif start -c mp4 -f 60 -a 'default_output|default_input' -r 60 -o "$videos"; then
+      notify-send "Replay Buffer" "Started (60s)"
+    else
+      notify-send "Replay Buffer" "Failed to start"
+    fi
+    ;;
   replay-toggle)
     if running; then
       pkill -SIGINT -x "$comm"
@@ -60,7 +69,7 @@ case "${1:-}" in
     fi
     ;;
   *)
-    echo "usage: $0 replay-toggle|replay-save|record-toggle" >&2
+    echo "usage: $0 replay-start|replay-toggle|replay-save|record-toggle" >&2
     exit 1
     ;;
 esac

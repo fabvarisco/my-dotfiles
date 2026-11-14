@@ -225,6 +225,7 @@ hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
 hl.bind("ALT + SPACE", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd([[vicinae 'vicinae://launch/clipboard/history?toggle=true']]))
 hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd("~/.config/hypr/wallpaper-vicinae.sh"))
+hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd("~/.config/hypr/comms-toggle.sh"))
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("kitty --class hyprmon -e hyprmon"))
 hl.bind(mainMod .. " + SHIFT + M", hl.dsp.exec_cmd("kitty --class mouse-sens -e ~/.config/hypr/mouse-sensitivity.sh"))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("kitty --class cava -e cava"))
@@ -312,6 +313,18 @@ hl.window_rule({
     match = { title = "^(Picture-in-Picture)$" },
     float = true,
     pin = true,
+})
+
+hl.window_rule({
+    name = "comms-vesktop",
+    match = { class = "^(vesktop)$" },
+    workspace = "special:comms silent",
+})
+
+hl.window_rule({
+    name = "comms-teamspeak",
+    match = { class = "^(TeamSpeak)$" },
+    workspace = "special:comms silent",
 })
 
 hl.layer_rule({

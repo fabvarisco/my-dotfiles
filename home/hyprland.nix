@@ -56,6 +56,14 @@
     source = ../config/hyprland/gpu-screen.sh;
     executable = true;
   };
+  home.file.".config/hypr/comms-toggle.sh" = {
+    source = ../config/hyprland/comms-toggle.sh;
+    executable = true;
+  };
+  home.file.".config/hypr/wallpaper-cycle.sh" = {
+    source = ../config/hyprland/wallpaper-cycle.sh;
+    executable = true;
+  };
   home.file.".config/hypr/mouse-sensitivity.sh" = {
     source = ../config/hyprland/mouse-sensitivity.sh;
     executable = true;

@@ -65,5 +65,8 @@
     capSysNice = true;
   };
 
+  # Elgato Stream Deck (Linux). Installs the app and udev rules for vendor 0fd9.
+  programs.streamcontroller.enable = true;
+
   services.flatpak.enable = true;
 }
